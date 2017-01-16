@@ -18,7 +18,7 @@ create-tag-release: assert-no-pending-tags
 	@export VERSION=$$(git tag --sort=v:refname | tail -1) && \
 	export MAJOR=$$(echo $$VERSION | awk '{ print substr($$0,3,1) }') && \
 	export MINOR=$$(echo $$VERSION | awk '{ print substr($00,5,1) }') && \
-	export NEW_VERSION=v0.$$((MAJOR+1)) && \
+	export NEW_VERSION=v0.$$((MAJOR+1)).0 && \
 	echo "$$VERSION -> $$NEW_VERSION" && \
 	git tag $$NEW_VERSION && \
 	git push --tags
