@@ -3,12 +3,12 @@
 all:
 	cd rutte
 	make build
-	# cd ../arib
-	# npm install
-	# npm run tsc
-	# cd ../opstelten
-	# npm install
-	# npm run tsc
+	cd ../arib
+	npm install
+	npm run tsc
+	cd ../opstelten
+	npm install
+	npm run tsc
 
 ## invoke this to create a hotfix release (e.g. 1.6 -> 1.7)
 .PHONY: create-tag-hotfix
