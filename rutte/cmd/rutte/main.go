@@ -17,6 +17,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pressly/chi"
 	"github.com/pressly/chi/middleware"
+	_ "github.com/lib/pq" // package registers driver to database/sql
 )
 
 // Options type holding all flags/envs for the program
