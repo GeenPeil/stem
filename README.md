@@ -8,7 +8,7 @@ This projects now consists of 4 main components:
  - `arib`: The front-end for party members (member self-service, voting and discussion).
  - `opstelten`: The front-end for GeenPeil HQ personnel.
 
-To get started, read the README's of individual components.
+To get started, read the README's of individual components in order as listed above.
 
 ![Simple overview of components](docs/overview.png)
 
