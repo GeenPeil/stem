@@ -15,7 +15,9 @@ To get started, read the README's of individual components in order as listed ab
 
 ### I would like to participate
 
-Awesome! Go to [Projects](https://github.com/GeenPeil/stem/projects) to find yourself a suiting task to complete. Make sure the task is in a "TODO" column and not already assigned.
+Awesome! First of all, make sure you have access to the project and communication channels. Please mail me at `geertjohan@geenpeil.nl` and explain what your skills are and how you would like to contribute. I'll get back to you as soon as possible.
+
+Once you're added to the developers team, go to [Projects](https://github.com/GeenPeil/stem/projects) to find yourself a suiting task to complete. Make sure the task is in a "TODO" column and not already assigned.
 
 Once you've found a task you are willing to take on it's important to assign yourself to this task so we know you are working on it and move it to the "In Progress" column. Create a fork of the repository. Create a new branch on your fork and push your masterpiece. Once complete, back to GitHub to create a pull request. 
 
