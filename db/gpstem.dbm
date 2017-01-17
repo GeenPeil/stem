@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.8.2" author="Geert-Johan Riemer" last-position="0,0" last-zoom="1"
+<dbmodel pgmodeler-ver="0.8.2" author="Geert-Johan Riemer" last-position="3,0" last-zoom="1"
 	 default-schema="public" default-owner="postgres">
 <database name="gpstem">
 </database>
@@ -18,10 +18,121 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="accounts">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="120" y="109"/>
+	<appended-sql><![CDATA[CREATE OR REPLACE FUNCTION is_adult(members.accounts) RETURNS boolean AS $$
+	SELECT date_part('year', age($1.birthdate)) >= 18
+$$ VOLATILE LANGUAGE SQL;]]></appended-sql>
+	<position x="60" y="80"/>
 	<column name="id" not-null="true">
 		<type name="serial"/>
 	</column>
+	<column name="email" not-null="true">
+		<type name="varchar" length="200"/>
+	</column>
+	<column name="nickname">
+		<type name="varchar" length="30"/>
+	</column>
+	<column name="given_name">
+		<type name="varchar" length="100"/>
+	</column>
+	<column name="first_names">
+		<type name="varchar" length="200"/>
+		<comment><![CDATA[Separated by space]]></comment>
+	</column>
+	<column name="initials" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment><![CDATA[Initials, no separation signs]]></comment>
+	</column>
+	<column name="last_name" not-null="true">
+		<type name="varchar" length="200"/>
+		<comment><![CDATA[Includes prefix]]></comment>
+	</column>
+	<column name="birthdate" not-null="true">
+		<type name="date"/>
+	</column>
+	<column name="phonenumber">
+		<type name="varchar" length="15"/>
+	</column>
+	<column name="postalcode">
+		<type name="varchar" length="10"/>
+	</column>
+	<column name="housenumber">
+		<type name="varchar" length="10"/>
+	</column>
+	<column name="housenumber_suffix">
+		<type name="varchar" length="10"/>
+	</column>
+	<column name="streetname">
+		<type name="varchar" length="200"/>
+	</column>
+	<column name="city">
+		<type name="varchar" length="200"/>
+	</column>
+	<column name="province">
+		<type name="varchar" length="100"/>
+	</column>
+	<column name="country">
+		<type name="varchar" length="100"/>
+	</column>
+	<column name="last_payment_date" not-null="true">
+		<type name="date"/>
+	</column>
+	<column name="verified_email" not-null="true" default-value="false">
+		<type name="boolean"/>
+	</column>
+	<column name="verified_identity" not-null="true" default-value="false">
+		<type name="boolean"/>
+	</column>
+	<column name="verified_voting_entitlement" not-null="true" default-value="false">
+		<type name="boolean"/>
+	</column>
+	<constraint name="accounts_pk" type="pk-constr" table="members.accounts">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="accounts_uq_email" type="uq-constr" table="members.accounts">
+		<columns names="email" ref-type="src-columns"/>
+	</constraint>
 </table>
+
+<function name="accounts_fn_lock_identity"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="members"/>
+	<role name="postgres"/>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="trigger"/>
+	</return-type>
+	<definition><![CDATA[DECLARE
+	item_dimension_id integer;
+	image_dimension_id integer;
+BEGIN
+	IF OLD.verified_identity AND NOT NEW.verified_identity THEN 
+		RAISE EXCEPTION 'Cannot undo verified identity';
+	END IF;
+	IF OLD.verified_identity THEN
+		IF OLD.initials != NEW.initials THEN
+			RAISE EXCEPTION 'Cannot change initials when identity is verified';
+		END IF;
+		IF OLD.last_name != NEW.last_name THEN
+			RAISE EXCEPTION 'Cannot change last_name when identity is verified';
+		END IF;
+		IF OLD.birthdate != NEW.birthdate THEN
+			RAISE EXCEPTION 'Cannot change birthdate when identity is verified';
+		END IF;
+	END IF;
+	RETURN NEW;
+END;]]></definition>
+</function>
+
+<trigger name="accounts_tr_lock_identity" firing-type="AFTER" per-line="true" constraint="true"
+	 ins-event="false" del-event="false" upd-event="true" trunc-event="false"
+	 table="members.accounts">
+		<function signature="members.accounts_fn_lock_identity()"/>
+</trigger>
 
 </dbmodel>
