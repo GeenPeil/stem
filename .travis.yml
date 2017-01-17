@@ -1,7 +1,8 @@
 language: go
 go:
-  - 1.7.x
-
+- 1.7.x
 install: sudo aptitude --assume-yes install npm
-
 script: make all
+notifications:
+  slack:
+    secure: mWm58R+UK9pRhyERlSS3Dezxec+vFq9YPtpy4gpPQbAZA5zeZdAhGKj65NBcDFEYyXnGxIymbA0ZRZ4MVub7hLU0bvFS+VQyTGAwADQFgOl0rku7uLmdWrA2vBZBt1AkAQejYYFsG/No9KCDGw40W3su2llzfWqxrh5Tw8XxSTZfo3yytBcTqyxV6mouqsm407/Hv81tU06Cudgn43b5KYNagjjzYj5yI0xBC0DANK0ywEqJ0VE2hpCvhZpFRgjeIJSqvlt8KnBFzip8DwNUzJ4blXVHQILOqNt0PaaxeQ18IsKL7ug2WqegDuHOhBpNF5ITUqpTF4W4gNwzgM3QVQH2xE64bkKKuRE7lEHJ0xNtWkMU8dNSS+B6CP/D+4A4TgCf6V/pUSbiTct/NYGzcVC7HmNnlcaBL60HMum0CECy10Ba2EnfexB8CtHCDneKzy5TsdR18DwVQvVfdDHX7CpLE5C5ISO35+M2mWS1orIOtUTKC++6L4qWTwWm4rqkPGaRP3aQwlN3NhRJi6oJzd9wTfqQFuORsJKtm3vaAmW19zFuxxUEFYwqQwBELGgvf2kAgqbbnspcqlZlD4XteZX4e7//oQ51uhJXezasGzzP+LNrK5NMOU1x3dXGMHvOb1pV+LltPQxSxg6xCFS3Q7u3flmQ6rNuH/qZXwyAGX4=
