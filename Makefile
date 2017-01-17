@@ -1,13 +1,13 @@
 
 .PHONY: all
 all:
-	cd rutte
+	cd rutte && \
 	make build
-	cd ../arib
-	npm install
+	cd arib && \
+	npm install && \
 	npm run tsc
-	cd ../opstelten
-	npm install
+	cd opstelten && \
+	npm install && \
 	npm run tsc
 
 ## invoke this to create a hotfix release (e.g. 1.6 -> 1.7)
