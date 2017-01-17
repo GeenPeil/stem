@@ -3,8 +3,14 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.8.2" author="Geert-Johan Riemer" last-position="3,0" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0-alpha1" author="Geert-Johan Riemer" last-position="1,0" last-zoom="1"
 	 default-schema="public" default-owner="postgres">
+<role name="rutte"
+      superuser="true"
+      login="true"
+      password="rutte">
+</role>
+
 <database name="gpstem">
 </database>
 
@@ -21,9 +27,9 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<appended-sql><![CDATA[CREATE OR REPLACE FUNCTION is_adult(members.accounts) RETURNS boolean AS $$
 	SELECT date_part('year', age($1.birthdate)) >= 18
 $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
-	<position x="60" y="80"/>
+	<position x="120" y="140"/>
 	<column name="id" not-null="true">
-		<type name="serial"/>
+		<type name="serial" length="1"/>
 	</column>
 	<column name="email" not-null="true">
 		<type name="varchar" length="200"/>
@@ -47,7 +53,7 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 		<comment><![CDATA[Includes prefix]]></comment>
 	</column>
 	<column name="birthdate" not-null="true">
-		<type name="date"/>
+		<type name="date" length="1"/>
 	</column>
 	<column name="phonenumber">
 		<type name="varchar" length="15"/>
@@ -74,16 +80,16 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 		<type name="varchar" length="100"/>
 	</column>
 	<column name="last_payment_date" not-null="true">
-		<type name="date"/>
+		<type name="date" length="1"/>
 	</column>
 	<column name="verified_email" not-null="true" default-value="false">
-		<type name="boolean"/>
+		<type name="boolean" length="1"/>
 	</column>
 	<column name="verified_identity" not-null="true" default-value="false">
-		<type name="boolean"/>
+		<type name="boolean" length="1"/>
 	</column>
 	<column name="verified_voting_entitlement" not-null="true" default-value="false">
-		<type name="boolean"/>
+		<type name="boolean" length="1"/>
 	</column>
 	<constraint name="accounts_pk" type="pk-constr" table="members.accounts">
 		<columns names="id" ref-type="src-columns"/>
@@ -91,6 +97,10 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<constraint name="accounts_uq_email" type="uq-constr" table="members.accounts">
 		<columns names="email" ref-type="src-columns"/>
 	</constraint>
+	<initial-data>
+<![CDATA[id•email•nickname•given_name•first_names•initials•last_name•birthdate•phonenumber•postalcode•housenumber•housenumber_suffix•streetname•city•province•country•last_payment_date•verified_email•verified_identity•verified_voting_entitlement⸣
+1•geertjohan@geertjohan.net•GeertJohan•Geert-Johan•Geert Johan•GJ•Riemer•01-01-1990•31612345678•1234AB•10•A•Somestreet•Peilstad•Noord-Holland•Nederland••••]]>
+	</initial-data>
 </table>
 
 <function name="accounts_fn_lock_identity"
@@ -105,7 +115,7 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<role name="postgres"/>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
-	<type name="trigger"/>
+	<type name="trigger" length="1"/>
 	</return-type>
 	<definition><![CDATA[DECLARE
 	item_dimension_id integer;
@@ -134,5 +144,37 @@ END;]]></definition>
 	 table="members.accounts">
 		<function signature="members.accounts_fn_lock_identity()"/>
 </trigger>
+
+<table name="sessions">
+	<schema name="members"/>
+	<role name="postgres"/>
+	<position x="840" y="140"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="1"/>
+	</column>
+	<column name="account_id" not-null="true">
+		<type name="integer" length="1"/>
+	</column>
+	<column name="token" not-null="true">
+		<type name="varchar" length="200"/>
+	</column>
+	<column name="timeout" not-null="true" default-value="NOW()">
+		<type name="timestamp" length="1"/>
+	</column>
+	<constraint name="sessions_pk" type="pk-constr" table="members.sessions">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<constraint name="sessions_fk_account" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="CASCADE" ref-table="members.accounts" table="members.sessions">
+	<columns names="account_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<relationship name="rel_sessions_accounts" type="relfk"
+	 src-table="members.sessions"
+	 dst-table="members.accounts"
+	 src-required="false" dst-required="false"/>
 
 </dbmodel>
