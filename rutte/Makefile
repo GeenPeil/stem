@@ -10,6 +10,10 @@ build:
 	GOBIN="$(CURDIR)/dist/bin" go install -ldflags '$(LDFLAGS)' $(CMDS)
 	dist/bin/rutte -v >/dev/null
 
+.PHONY: dependencies
+dependencies:
+	go get -u -a ./...
+
 .PHONY: all
 all: build
 

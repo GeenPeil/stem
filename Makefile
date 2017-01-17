@@ -2,6 +2,7 @@
 .PHONY: all
 all:
 	cd rutte && \
+	make dependencies && \
 	make build
 	cd arib && \
 	npm install && \
