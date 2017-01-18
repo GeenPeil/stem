@@ -15,9 +15,9 @@ import (
 	"github.com/huandu/xstrings"
 	flags "github.com/jessevdk/go-flags"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq" // package registers driver to database/sql
 	"github.com/pressly/chi"
 	"github.com/pressly/chi/middleware"
-	_ "github.com/lib/pq" // package registers driver to database/sql
 )
 
 // Options type holding all flags/envs for the program
@@ -26,8 +26,8 @@ type Options struct {
 
 	Version bool `long:"version" short:"v" description:"Display version and exit"`
 
-	GPStemDSN          string `long:"gpstem-dsn" env:"INVITION_DSN" default:"host='127.0.0.1' dbname=ipp user=rutte password=rutte sslmode=disable" description:"Invition database Postgres Data Source Name"`
-	GPStemMaxOpenConns uint   `long:"gpstem-max-open-conns" env:"INVITION_MAX_OPEN_CONNS" default:"100" description:"Maximum open connections allowed in the pool for Invition database."`
+	GPStemDSN          string `long:"gpstem-dsn" env:"GPSTEM_DSN" default:"host='127.0.0.1' dbname=gpstem user=rutte password=rutte sslmode=disable" description:"GeenPeil stem database Postgres Data Source Name"`
+	GPStemMaxOpenConns uint   `long:"gpstem-max-open-conns" env:"GPSTEM_MAX_OPEN_CONNS" default:"100" description:"Maximum open connections allowed in the pool for GeenPeil stem database."`
 
 	HTTPAddress            string `long:"http-addr" env:"HTTP_ADDR" default:":8002" description:"HTTP address to bind to"`
 	HTTPEnableWildcardCORS bool   `long:"http-enable-wildcard-cors" description:"Enable HTTP Cross-Origin Resource Sharing"`
