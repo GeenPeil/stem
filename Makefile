@@ -6,10 +6,14 @@ all:
 	make build
 	cd arib && \
 	yarn && \
-	npm run tsc
+	npm run tsc && \
+	npm run test-once && \
+	npm run e2e && \
 	cd opstelten && \
 	yarn && \
-	npm run tsc
+	npm run tsc && \
+	npm run test-once && \
+	npm run e2e
 
 ## invoke this to create a hotfix release (e.g. 1.6 -> 1.7)
 .PHONY: create-tag-hotfix
