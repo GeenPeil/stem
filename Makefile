@@ -6,12 +6,10 @@ all:
 	make build
 	cd arib && \
 	yarn && \
-	npm run tsc && \
 	npm run test-once && \
 	npm run e2e && \
 	cd opstelten && \
 	yarn && \
-	npm run tsc && \
 	npm run test-once && \
 	npm run e2e
 
