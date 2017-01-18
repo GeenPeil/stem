@@ -6,6 +6,12 @@ install:
 - "curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -"
 - "sudo apt-get install -y nodejs"
 
+cache:
+  yarn: true
+  directories:
+    - arib/node_modules
+    - opstelten/node_modules
+
 script: make all
 
 notifications:
