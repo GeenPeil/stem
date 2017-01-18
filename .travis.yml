@@ -2,6 +2,9 @@ language: go
 go:
 - 1.7.x
 
+node_js:
+  - "node"
+
 before_install: # if "install" is overridden
   # Repo for Yarn
   - sudo apt-key adv --fetch-keys http://dl.yarnpkg.com/debian/pubkey.gpg
