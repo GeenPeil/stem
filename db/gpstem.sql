@@ -1,10 +1,18 @@
 -- Database generated with pgModeler (PostgreSQL Database Modeler).
--- pgModeler  version: 0.8.2
--- PostgreSQL version: 9.5
+-- pgModeler  version: 0.9.0-alpha1
+-- PostgreSQL version: 9.6
 -- Project Site: pgmodeler.com.br
 -- Model Author: Geert-Johan Riemer
 
 SET check_function_bodies = false;
+-- ddl-end --
+
+-- object: rutte | type: ROLE --
+-- DROP ROLE IF EXISTS rutte;
+CREATE ROLE rutte WITH 
+	SUPERUSER
+	LOGIN
+	UNENCRYPTED PASSWORD 'rutte';
 -- ddl-end --
 
 
@@ -70,6 +78,9 @@ CREATE OR REPLACE FUNCTION is_adult(members.accounts) RETURNS boolean AS $$
 $$ VOLATILE LANGUAGE SQL;
 -- ddl-end --
 
+INSERT INTO members.accounts (id, email, nickname, given_name, first_names, initials, last_name, birthdate, phonenumber, postalcode, housenumber, housenumber_suffix, streetname, city, province, country, last_payment_date, verified_email, verified_identity, verified_voting_entitlement) VALUES (E'1', E'geertjohan@geertjohan.net', E'GeertJohan', E'Geert-Johan', E'Geert Johan', E'GJ', E'Riemer', E'01-01-1990', E'31612345678', E'1234AB', E'10', E'A', E'Somestreet', E'Peilstad', E'Noord-Holland', E'Nederland', DEFAULT, DEFAULT, DEFAULT, DEFAULT);
+-- ddl-end --
+
 -- object: members.accounts_fn_lock_identity | type: FUNCTION --
 -- DROP FUNCTION IF EXISTS members.accounts_fn_lock_identity() CASCADE;
 CREATE FUNCTION members.accounts_fn_lock_identity ()
@@ -113,6 +124,27 @@ CREATE CONSTRAINT TRIGGER accounts_tr_lock_identity
 	NOT DEFERRABLE 
 	FOR EACH ROW
 	EXECUTE PROCEDURE members.accounts_fn_lock_identity();
+-- ddl-end --
+
+-- object: members.sessions | type: TABLE --
+-- DROP TABLE IF EXISTS members.sessions CASCADE;
+CREATE TABLE members.sessions(
+	id serial NOT NULL,
+	account_id integer NOT NULL,
+	token varchar(200) NOT NULL,
+	timeout timestamp NOT NULL DEFAULT NOW(),
+	CONSTRAINT sessions_pk PRIMARY KEY (id)
+
+);
+-- ddl-end --
+ALTER TABLE members.sessions OWNER TO postgres;
+-- ddl-end --
+
+-- object: sessions_fk_account | type: CONSTRAINT --
+-- ALTER TABLE members.sessions DROP CONSTRAINT IF EXISTS sessions_fk_account CASCADE;
+ALTER TABLE members.sessions ADD CONSTRAINT sessions_fk_account FOREIGN KEY (account_id)
+REFERENCES members.accounts (id) MATCH FULL
+ON DELETE CASCADE ON UPDATE CASCADE;
 -- ddl-end --
 
 
