@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Http, Headers } from '@angular/http';
+import { Http, Headers, Response } from '@angular/http';
+import { Observable } from 'rxjs/Rx';
 
 import { Auth } from './auth.service';
 import { ConfigService } from '../common/config.service';
@@ -23,16 +24,14 @@ export class AuthHttp {
     get(url: string) {
         let headers = new Headers();
         this.createAuthorizationHeader(headers);
-        return this.http.get(this.config.apiURL + "/api/" + url, {
-            headers: headers
-        });
+        return this.http.get(this.config.apiURL + "/api/" + url, { headers })
+            .map((res: Response) => res.json());
     }
 
     post(url: string, data: any) {
         let headers = new Headers();
         this.createAuthorizationHeader(headers);
-        return this.http.post(this.config.apiURL + "/api/" + url, data, {
-            headers: headers
-        });
+        return this.http.post(this.config.apiURL + "/api/" + url, data, { headers })
+            .map((res: Response) => res.json());
     }
 }

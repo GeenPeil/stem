@@ -4,18 +4,29 @@ import { Observable } from 'rxjs/Observable';
 
 import { ConfigService } from '../common/config.service';
 
+interface Session {
+    id: number;
+    token: string;
+}
+
 @Injectable()
 export class Auth {
 
     constructor(private http: Http, private config: ConfigService) { }
 
-    // session is stored internally
-    private session: any; // TODO: type
+    private session: Session = null;
+    private userId = 0;
+
+    getUserId(): number {
+        return this.userId;
+    }
+
     getSessionToken(): string {
-        if (!this.session) {
-            return ``;
-        }
-        return this.session.token;
+        return (this.session ? this.session.token : '');
+    }
+
+    isLoggedIn(): boolean {
+        return !!this.session;
     }
 
     // tryLogin tries to obtain a valid session from the server using given credentials
@@ -23,6 +34,7 @@ export class Auth {
     tryLogin(id: number) {
         return this.http.post(this.config.apiURL + "/api/login", JSON.stringify({ id: id }))
             .map((data: Response) => {
+                this.userId = id;
                 this.session = data.json().session;
                 return true;
             }).catch((error: any) => {
