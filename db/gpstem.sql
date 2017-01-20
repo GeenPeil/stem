@@ -78,7 +78,7 @@ CREATE OR REPLACE FUNCTION is_adult(members.accounts) RETURNS boolean AS $$
 $$ VOLATILE LANGUAGE SQL;
 -- ddl-end --
 
-INSERT INTO members.accounts (id, email, nickname, given_name, first_names, initials, last_name, birthdate, phonenumber, postalcode, housenumber, housenumber_suffix, streetname, city, province, country, last_payment_date, verified_email, verified_identity, verified_voting_entitlement) VALUES (E'1', E'geertjohan@geertjohan.net', E'GeertJohan', E'Geert-Johan', E'Geert Johan', E'GJ', E'Riemer', E'01-01-1990', E'31612345678', E'1234AB', E'10', E'A', E'Somestreet', E'Peilstad', E'Noord-Holland', E'Nederland', DEFAULT, DEFAULT, DEFAULT, DEFAULT);
+INSERT INTO members.accounts (id, email, nickname, given_name, first_names, initials, last_name, birthdate, phonenumber, postalcode, housenumber, housenumber_suffix, streetname, city, province, country, last_payment_date, verified_email, verified_identity, verified_voting_entitlement) VALUES (E'1', E'geertjohan@geertjohan.net', E'GeertJohan', E'Geert-Johan', E'Geert Johan', E'GJ', E'Riemer', E'01-01-1990', E'31612345678', E'1234AB', E'10', E'A', E'Somestreet', E'Peilstad', E'Noord-Holland', E'Nederland', E'2017-01-01', E'f', E'f', E'f');
 -- ddl-end --
 
 -- object: members.accounts_fn_lock_identity | type: FUNCTION --
