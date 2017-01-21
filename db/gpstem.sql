@@ -140,11 +140,33 @@ CREATE TABLE members.sessions(
 ALTER TABLE members.sessions OWNER TO postgres;
 -- ddl-end --
 
+-- object: members.entitlement_proofs | type: TABLE --
+-- DROP TABLE IF EXISTS members.entitlement_proofs CASCADE;
+CREATE TABLE members.entitlement_proofs(
+	id serial NOT NULL,
+	account_id integer NOT NULL,
+	filename varchar(100) NOT NULL,
+	original_filename varchar(200) NOT NULL,
+	CONSTRAINT entitlement_proofs_pk PRIMARY KEY (id),
+	CONSTRAINT entitlement_proofs_uq_filename UNIQUE (filename)
+
+);
+-- ddl-end --
+ALTER TABLE members.entitlement_proofs OWNER TO postgres;
+-- ddl-end --
+
 -- object: sessions_fk_account | type: CONSTRAINT --
 -- ALTER TABLE members.sessions DROP CONSTRAINT IF EXISTS sessions_fk_account CASCADE;
 ALTER TABLE members.sessions ADD CONSTRAINT sessions_fk_account FOREIGN KEY (account_id)
 REFERENCES members.accounts (id) MATCH FULL
 ON DELETE CASCADE ON UPDATE CASCADE;
+-- ddl-end --
+
+-- object: entitlement_proofs_fk_account | type: CONSTRAINT --
+-- ALTER TABLE members.entitlement_proofs DROP CONSTRAINT IF EXISTS entitlement_proofs_fk_account CASCADE;
+ALTER TABLE members.entitlement_proofs ADD CONSTRAINT entitlement_proofs_fk_account FOREIGN KEY (account_id)
+REFERENCES members.accounts (id) MATCH FULL
+ON DELETE NO ACTION ON UPDATE NO ACTION;
 -- ddl-end --
 
 
