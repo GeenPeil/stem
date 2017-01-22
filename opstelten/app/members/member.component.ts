@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -6,13 +7,15 @@ import { Observable } from 'rxjs/Observable';
 
 import { NotificationsService } from 'angular2-notifications';
 
-import { APIResponse } from '../common/api-response';
+import { CreateResponse } from '../api/create-response';
+import { UpdateResponse } from '../api/update-response';
 
 import { Member } from "./member";
 import { MemberService } from './member.service';
 
 @Component({
     templateUrl: 'app/members/member.component.html',
+    styleUrls: ['app/members/member.component.css']
 })
 export class MemberComponent {
     constructor(
@@ -21,6 +24,8 @@ export class MemberComponent {
         private memberService: MemberService,
         private notificationService: NotificationsService
     ) { }
+
+    @ViewChild('memberForm') memberForm: NgForm;
 
     member: Member = new Member();
     errors: string[] = [];
@@ -33,43 +38,60 @@ export class MemberComponent {
             }
 
             let id = +params['id'];
-            if (id != this.member.id) {
+            if (this.member.id != id) {
+                // reset current member to avoid accidents during loading of new member
+                this.member = new Member;
+                // load requested member
                 this.memberService.getMember(id)
-                    .then((member: Member) => this.member = member)
+                    .then((member: Member) => {
+                        this.member = member;
+                        this.memberForm.control.markAsPristine();
+                    })
                     .catch((error: any) => alert(error));
             }
         });
     }
 
     private save() {
-        let call: Promise<APIResponse>;
+        this.errors = [];
         if (this.member.id == undefined) {
-            call = this.memberService.postMember(this.member);
+            this.memberService.postMember(this.member).then((res: CreateResponse) => {
+                if (res.hasErrors()) {
+                    this.handleSaveErrors(res.errors);
+                    return;
+                }
+                this.router.navigate(['member', res.id]);
+                this.notificationService.success('Nieuw lid opgeslagen', `'${this.member.initials} ${this.member.lastName}' is succesvol opgeslagen.`);
+            }).catch((error: any) => alert(error));
         } else {
-            call = this.memberService.putMember(this.member.id, this.member);
+            this.memberService.putMember(this.member.id, this.member).then((res: UpdateResponse) => {
+                if (res.hasErrors()) {
+                    this.handleSaveErrors(res.errors);
+                    return;
+                }
+                this.memberForm.control.markAsPristine();
+                this.notificationService.success('Aanpassingen opgeslagen', `Aanpassingen aan '${this.member.initials} ${this.member.lastName}' zijn opgeslagen.`);
+            }).catch((error: any) => alert(error));
         }
+    }
 
-        call.then(response => {
-            if (response.errors.length > 0) {
-                response.errors.forEach((error: any) => {
-                    switch (error) {
-                        default:
-                            alert('unhandled error: ' + error);
-                            break;
-                    }
-                });
-                this.errors = response.errors;
-                return;
+    private handleSaveErrors(errors: string[]) {
+        errors.forEach((error: any) => {
+            switch (error) {
+                case 'rutte:invalid_email_address':
+                case 'pgerr:accounts_uq_email':
+                case 'pgerr:check_violation:accounts_check_age_over_14':
+                    // handled by form
+                    break;
+                case 'pgerr:datetime_field_overflow':
+                    alert('Datum fout'); // TODO: dialog
+                    break;
+                default:
+                    alert('unhandled error: ' + error);
+                    break;
             }
-            this.errors = [];
-            if (this.member.id == undefined) {
-                this.member.id = response.id;
-                this.router.navigate(['/stock', 'member', response.id]);
-                this.notificationService.create('New member created', `${this.member.initials} ${this.member.lastName} has been created.`, 'success');
-            } else {
-                this.notificationService.create('Changes saved', `Changes to ${this.member.initials} ${this.member.lastName} were saved.`, 'success');
-            }
-        })
-            .catch(error => alert(error));
+        });
+        this.errors = errors;
+        return;
     }
 }

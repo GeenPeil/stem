@@ -3,19 +3,20 @@ import { Http, Response } from '@angular/http';
 
 import { Observable } from 'rxjs/Observable';
 
-import { APIResponse } from '../common/api-response';
-import { AuthHttp } from '../auth/auth-http.service';
+import { Api } from '../api/api.service';
+import { CreateResponse } from '../api/create-response';
+import { UpdateResponse } from '../api/update-response';
 
 import { Member } from './member';
 
 @Injectable()
 export class MemberService {
 
-    constructor(private http: AuthHttp) { }
+    constructor(private api: Api) { }
 
     // public getMembers(searchQuery: string): Observable<Member[]> {
     //     console.log("getMembers", searchQuery);
-    //     return this.http.get(Member, 'members')
+    //     return this.api.get(Member, 'members')
     //         .map((res: Response) => {
     //             let members = res.json().members.filter((member: Member) => {
     //                 if (searchQuery === `` || searchQuery == null) {
@@ -43,17 +44,17 @@ export class MemberService {
     //         .catch(this.handleError)
     // }
 
+    public postMember(member: Member): Promise<CreateResponse> {
+        return this.api.post('member', JSON.stringify(member)).toPromise();
+    }
+
     public getMember(id: number): Promise<Member> {
         console.log("getMember", id);
-        return this.http.get(Member, 'member/' + id).toPromise();
+        return this.api.get(Member, 'member/' + id).toPromise();
     }
 
-    public putMember(id: number, member: Member): Promise<APIResponse> {
-        return this.http.put('member/' + id, JSON.stringify(member)).toPromise();
-    }
-
-    public postMember(member: Member): Promise<APIResponse> {
-        return this.http.post('member', JSON.stringify(member)).toPromise();
+    public putMember(id: number, member: Member): Promise<UpdateResponse> {
+        return this.api.put('member/' + id, JSON.stringify(member)).toPromise();
     }
 
     private handleError(error: any) {

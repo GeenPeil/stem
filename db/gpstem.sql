@@ -61,7 +61,8 @@ CREATE TABLE members.accounts(
 	CONSTRAINT accounts_pk PRIMARY KEY (id),
 	CONSTRAINT accounts_uq_email UNIQUE (email),
 	CONSTRAINT accounts_uq_nickname UNIQUE (nickname),
-	CONSTRAINT accounts_check_nickname_length CHECK (char_length(nickname) > 3)
+	CONSTRAINT accounts_check_nickname_length CHECK (char_length(nickname) > 3),
+	CONSTRAINT accounts_check_age_over_14 CHECK (date_part('year', age(birthdate)) >= 14)
 
 );
 -- ddl-end --
@@ -74,6 +75,8 @@ COMMENT ON COLUMN members.accounts.initials IS 'Initials, no separation signs';
 COMMENT ON COLUMN members.accounts.last_name IS 'Includes prefix';
 -- ddl-end --
 COMMENT ON COLUMN members.accounts.fee_last_payment_date IS 'When set to NULL, member has never paid.';
+-- ddl-end --
+COMMENT ON CONSTRAINT accounts_check_age_over_14 ON members.accounts  IS 'One can only become a member at age 14 or older.';
 -- ddl-end --
 ALTER TABLE members.accounts OWNER TO postgres;
 -- ddl-end --

@@ -1,4 +1,3 @@
-
 import { JsonObject, JsonMember } from 'typedjson-npm';
 
 @JsonObject()

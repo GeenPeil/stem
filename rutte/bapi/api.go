@@ -31,7 +31,9 @@ func (a *API) AttachChiRouter(r chi.Router) {
 	a.log.Infoln("attach chi router bapi")
 	r.Use(middleware.NoCache)
 	r.Get("/", a.getRoot)
+	r.Post("/member", a.postMember())
 	r.Get("/member/:id", a.getMember())
+	r.Put("/member/:id", a.putMember())
 }
 
 // getRoot handles get requests to root (show api version?)

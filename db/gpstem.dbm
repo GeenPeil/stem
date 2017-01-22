@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0-alpha1" author="Geert-Johan Riemer" last-position="8,0" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0-alpha1" author="Geert-Johan Riemer" last-position="0,0" last-zoom="1"
 	 default-schema="public" default-owner="postgres">
 <role name="rutte"
       superuser="true"
@@ -31,7 +31,7 @@ $$ VOLATILE LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION fee_paid(members.accounts) RETURNS boolean AS $$
 	SELECT coalesce(date_part('year', age($1.fee_last_payment_date)) < 1, false)
 $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
-	<position x="120" y="124"/>
+	<position x="120" y="120"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -109,6 +109,10 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<constraint name="accounts_check_nickname_length" type="ck-constr" table="members.accounts">
 			<expression><![CDATA[char_length(nickname) > 3]]></expression>
 	</constraint>
+	<constraint name="accounts_check_age_over_14" type="ck-constr" table="members.accounts">
+			<expression><![CDATA[date_part('year', age(birthdate)) >= 14]]></expression>
+		<comment><![CDATA[One can only become a member at age 14 or older.]]></comment>
+	</constraint>
 	<initial-data>
 <![CDATA[id•email•nickname•given_name•first_names•initials•last_name•birthdate•phonenumber•postalcode•housenumber•housenumber_suffix•streetname•city•province•country•fee_last_payment_date•verified_email•verified_identity•verified_voting_entitlement⸣
 1•geertjohan@geertjohan.net•GeertJohan•Geert-Johan•Geert Johan•GJ•Riemer•01-01-1990•31612345678•1234AB•10•A•Somestreet•Peilstad•Noord-Holland•Nederland•2017-01-01•f•f•f]]>
@@ -160,7 +164,7 @@ END;]]></definition>
 <table name="sessions">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="840" y="84"/>
+	<position x="840" y="80"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -181,7 +185,7 @@ END;]]></definition>
 <table name="entitlement_proofs">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="840" y="284"/>
+	<position x="840" y="280"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
