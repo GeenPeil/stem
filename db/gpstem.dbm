@@ -97,6 +97,9 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<column name="verified_voting_entitlement" not-null="true" default-value="false">
 		<type name="boolean" length="1"/>
 	</column>
+	<column name="textsearch_vector">
+		<type name="tsvector" length="0"/>
+	</column>
 	<constraint name="accounts_pk" type="pk-constr" table="members.accounts">
 		<columns names="id" ref-type="src-columns"/>
 	</constraint>
@@ -205,6 +208,48 @@ END;]]></definition>
 		<columns names="filename" ref-type="src-columns"/>
 	</constraint>
 </table>
+
+<function name="accounts_fn_update_textsearch"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="members"/>
+	<role name="postgres"/>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="trigger" length="0"/>
+	</return-type>
+	<definition><![CDATA[BEGIN
+	NEW.textsearch_vector = to_tsvector('english', 
+		coalesce(NEW.given_name,'') || ' ' ||
+		coalesce(NEW.first_names,'') || ' ' ||
+		coalesce(NEW.initials,'') || ' ' ||
+		coalesce(NEW.last_name,'') || ' ' ||
+		coalesce(NEW.first_names,'') || ' ' ||
+		coalesce(NEW.streetname, '') || ' ' ||
+		coalesce(NEW.city, ''));
+RETURN NEW;
+END;
+]]></definition>
+</function>
+
+<trigger name="accounts_tr_update_textsearch" firing-type="BEFORE" per-line="true" constraint="false"
+	 ins-event="true" del-event="false" upd-event="true" trunc-event="false"
+	 table="members.accounts">
+		<function signature="members.accounts_fn_update_textsearch()"/>
+</trigger>
+
+<index name="accounts_index_textsearch_vector" table="members.accounts"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="gin" factor="0">
+		<idxelement use-sorting="false">
+			<column name="textsearch_vector"/>
+		</idxelement>
+</index>
 
 <constraint name="sessions_fk_account" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="CASCADE" del-action="CASCADE" ref-table="members.accounts" table="members.sessions">

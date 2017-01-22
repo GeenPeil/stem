@@ -137,7 +137,7 @@
 						<div class="col-3">Identiteit</div>
 						<div class="col-9">
 							<span class="badge badge-success" *ngIf="member.verifiedIdentity">Geverifieerd</span>
-							<span class="badge badge-warning" *ngIf="!member.verifiedIdentity">Niet geverefieerd</span>
+							<span class="badge badge-warning" *ngIf="!member.verifiedIdentity">Niet geverifieerd</span>
 						</div>
 					</div>
 					<div class="row" >
@@ -151,7 +151,7 @@
 				<div class="form-group row">
 					<div class="col-12" >
 						<button class="btn btn-success" type="submit"
-							[disabled]="!memberForm.valid || !memberForm.dirty" >Save</button>
+							[disabled]="!memberForm.valid || !memberForm.dirty" >Opslaan</button>
 					</div>
 				</div>
 			</form>

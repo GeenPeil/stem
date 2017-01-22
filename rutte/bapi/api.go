@@ -34,6 +34,7 @@ func (a *API) AttachChiRouter(r chi.Router) {
 	r.Post("/member", a.postMember())
 	r.Get("/member/:id", a.getMember())
 	r.Put("/member/:id", a.putMember())
+	r.Get("/member-list", a.getMemberList())
 }
 
 // getRoot handles get requests to root (show api version?)
