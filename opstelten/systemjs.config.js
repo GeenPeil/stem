@@ -43,6 +43,10 @@
       'angular2-notifications': {
           main: 'components.js',
           defaultExtension: 'js'
+      },
+      'node_modules/typedjson-npm': {
+        main: 'js/typed-json.js',
+        defaultExtension: 'js'
       }
     }
   });

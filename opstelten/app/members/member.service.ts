@@ -13,40 +13,39 @@ export class MemberService {
 
     constructor(private http: AuthHttp) { }
 
-    public getMembers(searchQuery: string): Observable<Member[]> {
-        console.log("getMembers", searchQuery);
-        return this.http.get('members')
-            .map((res: Response) => {
-                let members = res.json().members.filter((member: Member) => {
-                    if (searchQuery === `` || searchQuery == null) {
-                        return true;
-                    }
-
-                    let memberNameMatches: boolean = true;
-                    for (var searchQueryPart of searchQuery.split(` `)) {
-                        if (member.nameParts().indexOf(searchQueryPart) == -1) {
-                            memberNameMatches = false;
-                            break;
-                        }
-                    }
-                    if (memberNameMatches) {
-                        return true;
-                    }
-
-                    if (member.postalcode === searchQuery) {
-                        return true;
-                    }
-                });
-                console.dir(members);
-                return members;
-            })
-            .catch(this.handleError)
-    }
+    // public getMembers(searchQuery: string): Observable<Member[]> {
+    //     console.log("getMembers", searchQuery);
+    //     return this.http.get(Member, 'members')
+    //         .map((res: Response) => {
+    //             let members = res.json().members.filter((member: Member) => {
+    //                 if (searchQuery === `` || searchQuery == null) {
+    //                     return true;
+    //                 }
+    // 
+    //                 let memberNameMatches: boolean = true;
+    //                 for (var searchQueryPart of searchQuery.split(` `)) {
+    //                     if (member.nameParts().indexOf(searchQueryPart) == -1) {
+    //                         memberNameMatches = false;
+    //                         break;
+    //                     }
+    //                 }
+    //                 if (memberNameMatches) {
+    //                     return true;
+    //                 }
+    // 
+    //                 if (member.postalcode === searchQuery) {
+    //                     return true;
+    //                 }
+    //             });
+    //             console.dir(members);
+    //             return members;
+    //         })
+    //         .catch(this.handleError)
+    // }
 
     public getMember(id: number): Promise<Member> {
         console.log("getMember", id);
-        return this.http.get('member/' + id)
-            .map((data: any) => data.memberDetails).toPromise();
+        return this.http.get(Member, 'member/' + id).toPromise();
     }
 
     public putMember(id: number, member: Member): Promise<APIResponse> {

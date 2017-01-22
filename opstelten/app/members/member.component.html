@@ -118,7 +118,7 @@
 					<div class="col-9">
 						<span class="badge badge-success" *ngIf="member.feePaid">Betaald</span>
 						<span class="badge badge-warning" *ngIf="!member.feePaid">Niet betaald</span>
-						<span *ngIf="member.feeLastPaymentDate" >Meest recente betaling was op {{member.feeLastPaymentDate | dateToString }}.</span>
+						<span *ngIf="member.feeLastPaymentDate" >Meest recente betaling was op {{ member.feeLastPaymentDate }}.</span>
 					</div>
 				</div>
 				<div class="row" >

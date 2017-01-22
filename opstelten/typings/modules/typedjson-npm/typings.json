@@ -1,0 +1,10 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "/home/geertjohan/src/github.com/GeenPeil/stem/opstelten/node_modules/typedjson-npm/package.json",
+    "raw": "npm:typedjson-npm",
+    "main": "js/typed-json.js",
+    "version": "0.1.6",
+    "name": "typedjson-npm"
+  }
+}

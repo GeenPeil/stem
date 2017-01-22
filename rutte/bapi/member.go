@@ -67,10 +67,6 @@ func (a *API) getMember() http.HandlerFunc {
 		VerifiedVotingEntitlement bool    `json:"verifiedVotingEntitlement"`
 	}
 
-	type Out struct {
-		MemberDetails OutMemberDetails `json:"memberDetails"`
-	}
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		log := log.WithField("requestID", middleware.GetReqID(r.Context()))
 
@@ -82,10 +78,8 @@ func (a *API) getMember() http.HandlerFunc {
 		}
 
 		// read profile from db
-		var out = Out{
-			MemberDetails: OutMemberDetails{},
-		}
-		err = stmtGetItem.QueryRowx(accountID).StructScan(&out.MemberDetails)
+		var out = OutMemberDetails{}
+		err = stmtGetItem.QueryRowx(accountID).StructScan(&out)
 		if err != nil {
 			log.WithError(err).Error("error scanning row into struct")
 			http.Error(w, "server error", http.StatusInternalServerError)
