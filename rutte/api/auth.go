@@ -66,7 +66,7 @@ func (a *API) accountID(r *http.Request) (uint64, error) {
 }
 
 func (a *API) login() http.HandlerFunc {
-	log := a.log.WithField("handler", "profile/overview")
+	log := a.log.WithField("handler", "login")
 	log.Infoln("setup")
 
 	stmtNewSession, err := a.db.Preparex(`INSERT INTO members.sessions (account_id, token) values ($1, $2) RETURNING sessions.id`)

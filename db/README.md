@@ -16,4 +16,14 @@ Execute `gpstem.sql` on your postgresql database named "gpstem" to create the da
     postgres-# \q
     $ sudo -u postgres psql gpstem < gpstem.sql
 
-**Please note: this will create a database user with superuser powers on your database instance, make sure you are not running a public accessible Postgresql database **
+**Please note: this will create a database user with superuser powers on your database instance, make sure you are not running a public accessible Postgresql database**
+
+### Cleanup
+
+To start from scratch, execute the following statements:
+
+```
+REVOKE ALL ON DATABASE gpstem FROM rutte;
+DROP USER rutte;
+DROP DATABASE gpstem;
+```

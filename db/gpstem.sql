@@ -41,33 +41,39 @@ CREATE TABLE members.accounts(
 	id serial NOT NULL,
 	email varchar(200) NOT NULL,
 	nickname varchar(30),
-	given_name varchar(100),
-	first_names varchar(200),
+	given_name varchar(100) NOT NULL DEFAULT '',
+	first_names varchar(200) NOT NULL DEFAULT '',
 	initials varchar(20) NOT NULL,
 	last_name varchar(200) NOT NULL,
 	birthdate date NOT NULL,
-	phonenumber varchar(15),
-	postalcode varchar(10),
-	housenumber varchar(10),
-	housenumber_suffix varchar(10),
-	streetname varchar(200),
-	city varchar(200),
-	province varchar(100),
-	country varchar(100),
-	last_payment_date date NOT NULL,
+	phonenumber varchar(15) NOT NULL DEFAULT '',
+	postalcode varchar(10) NOT NULL DEFAULT '',
+	housenumber varchar(10) NOT NULL DEFAULT '',
+	housenumber_suffix varchar(10) NOT NULL DEFAULT '',
+	streetname varchar(200) NOT NULL DEFAULT '',
+	city varchar(200) NOT NULL DEFAULT '',
+	province varchar(100) NOT NULL DEFAULT '',
+	country varchar(100) NOT NULL DEFAULT '',
+	fee_last_payment_date date,
 	verified_email boolean NOT NULL DEFAULT false,
 	verified_identity boolean NOT NULL DEFAULT false,
 	verified_voting_entitlement boolean NOT NULL DEFAULT false,
 	CONSTRAINT accounts_pk PRIMARY KEY (id),
-	CONSTRAINT accounts_uq_email UNIQUE (email)
+	CONSTRAINT accounts_uq_email UNIQUE (email),
+	CONSTRAINT accounts_uq_nickname UNIQUE (nickname),
+	CONSTRAINT accounts_check_nickname_length CHECK (char_length(nickname) > 3)
 
 );
+-- ddl-end --
+COMMENT ON COLUMN members.accounts.nickname IS 'When NULL, user has never chosen a nickname.';
 -- ddl-end --
 COMMENT ON COLUMN members.accounts.first_names IS 'Separated by space';
 -- ddl-end --
 COMMENT ON COLUMN members.accounts.initials IS 'Initials, no separation signs';
 -- ddl-end --
 COMMENT ON COLUMN members.accounts.last_name IS 'Includes prefix';
+-- ddl-end --
+COMMENT ON COLUMN members.accounts.fee_last_payment_date IS 'When set to NULL, member has never paid.';
 -- ddl-end --
 ALTER TABLE members.accounts OWNER TO postgres;
 -- ddl-end --
@@ -76,9 +82,13 @@ ALTER TABLE members.accounts OWNER TO postgres;
 CREATE OR REPLACE FUNCTION is_adult(members.accounts) RETURNS boolean AS $$
 	SELECT date_part('year', age($1.birthdate)) >= 18
 $$ VOLATILE LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION fee_paid(members.accounts) RETURNS boolean AS $$
+	SELECT coalesce(date_part('year', age($1.fee_last_payment_date)) < 1, false)
+$$ VOLATILE LANGUAGE SQL;
 -- ddl-end --
 
-INSERT INTO members.accounts (id, email, nickname, given_name, first_names, initials, last_name, birthdate, phonenumber, postalcode, housenumber, housenumber_suffix, streetname, city, province, country, last_payment_date, verified_email, verified_identity, verified_voting_entitlement) VALUES (E'1', E'geertjohan@geertjohan.net', E'GeertJohan', E'Geert-Johan', E'Geert Johan', E'GJ', E'Riemer', E'01-01-1990', E'31612345678', E'1234AB', E'10', E'A', E'Somestreet', E'Peilstad', E'Noord-Holland', E'Nederland', E'2017-01-01', E'f', E'f', E'f');
+INSERT INTO members.accounts (id, email, nickname, given_name, first_names, initials, last_name, birthdate, phonenumber, postalcode, housenumber, housenumber_suffix, streetname, city, province, country, fee_last_payment_date, verified_email, verified_identity, verified_voting_entitlement) VALUES (E'1', E'geertjohan@geertjohan.net', E'GeertJohan', E'Geert-Johan', E'Geert Johan', E'GJ', E'Riemer', E'01-01-1990', E'31612345678', E'1234AB', E'10', E'A', E'Somestreet', E'Peilstad', E'Noord-Holland', E'Nederland', E'2017-01-01', E'f', E'f', E'f');
 -- ddl-end --
 
 -- object: members.accounts_fn_lock_identity | type: FUNCTION --

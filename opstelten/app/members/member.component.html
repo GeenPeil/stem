@@ -1,0 +1,158 @@
+
+<div class="container" >
+	<div class="row">
+		<div class="col-12"><h1>{{member.initials}} {{member.lastName}}</h1></div>
+	</div>
+	<div class="row" >
+		<div class="col-8" >
+			<form (ngSubmit)="save()" #memberForm="ngForm">
+				<div class="form-group row">
+					<label for="givenName" class="col-2 col-form-label">Roepnaam</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="givenName"
+							[(ngModel)]="member.givenName" name="givenName">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="firstNames" class="col-2 col-form-label">Voornamen</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="firstNames"
+							[(ngModel)]="member.firstNames" name="firstNames">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="initials" class="col-2 col-form-label">Initialen</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="initials"
+							[(ngModel)]="member.initials" name="initials"
+							[disabled]="member.verifiedIdentity">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="lastName" class="col-2 col-form-label">Achternaam</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="lastName"
+							[(ngModel)]="member.lastName" name="lastName"
+							[disabled]="member.verifiedIdentity">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="birthdate" class="col-2 col-form-label">Geboortedatum</label>
+					<div class="col-10">
+						<div class="input-group">
+							<input type="text" class="form-control" id="birthdate"
+								[(ngModel)]="member.birthdate" name="birthdate"
+								[disabled]="member.verifiedIdentity" #birthdate="ngModel"
+								ngbDatepicker #d="ngbDatepicker" placeholder="yyyy-mm-dd">
+							<div class="input-group-addon" (click)="d.toggle()" >
+								<span class="icon-calendar" style="width: 1.2rem; height: 1rem; cursor: pointer;" ></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="email" class="col-2 col-form-label">Email</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="email"
+							[(ngModel)]="member.email" name="email" disabled="true">
+							<span class="badge badge-success" *ngIf="member.verifiedEmail">Geverifieerd</span>
+							<span class="badge badge-warning" *ngIf="!member.verifiedEmail">Niet geverefieerd</span>
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="phonenumber" class="col-2 col-form-label">Telefoonnummer</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="phonenumber"
+							[(ngModel)]="member.phonenumber" name="phonenumber">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="postalcode" class="col-2 col-form-label">Postcode</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="postalcode"
+							[(ngModel)]="member.postalcode" name="postalcode">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="streetname" class="col-2 col-form-label">Straatnaam</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="streetname"
+							[(ngModel)]="member.streetname" name="streetname">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="housenumber" class="col-2 col-form-label">Huisnummer</label>
+					<div class="col-5 col-md-2">
+						<input type="text" class="form-control" id="housenumber"
+							[(ngModel)]="member.housenumber" name="housenumber">
+					</div>
+					<div class="col-5 col-md-2">
+						<input type="text" class="form-control" id="housenumberSuffix"
+							[(ngModel)]="member.housenumberSuffix" name="housenumberSuffix"
+							placeholder="toevoeging">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="city" class="col-2 col-form-label">Plaatsnaam</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="city"
+							[(ngModel)]="member.city" name="city">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="province" class="col-2 col-form-label">Provincie</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="province"
+							[(ngModel)]="member.province" name="province">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label for="country" class="col-2 col-form-label">Land</label>
+					<div class="col-10">
+						<input type="text" class="form-control" id="country"
+							[(ngModel)]="member.country" name="country">
+					</div>
+				</div>
+				<div class="row" >
+					<div class="col-3">Betaalstatus</div>
+					<div class="col-9">
+						<span class="badge badge-success" *ngIf="member.feePaid">Betaald</span>
+						<span class="badge badge-warning" *ngIf="!member.feePaid">Niet betaald</span>
+						<span *ngIf="member.feeLastPaymentDate" >Meest recente betaling was op {{ member.feeLastPaymentDate }}.</span>
+					</div>
+				</div>
+				<div class="row" >
+					<div class="col-3">Meerderjarig</div>
+					<div class="col-9">
+						<span class="badge badge-success" *ngIf="!birthdate.dirty && member.isAdult">Meerderjarig</span>
+						<span class="badge badge-warning" *ngIf="!birthdate.dirty && !member.isAdult">Niet meerderjarig</span>
+						<span *ngIf="birthdate.dirty">Gegevens aangepast, sla op om deze status te zien.</span>
+					</div>
+				</div>
+				<div class="row" >
+					<div class="col-3">Identiteit</div>
+					<div class="col-9">
+						<span class="badge badge-success" *ngIf="member.verifiedIdentity">Geverifieerd</span>
+						<span class="badge badge-warning" *ngIf="!member.verifiedIdentity">Niet geverefieerd</span>
+					</div>
+				</div>
+				<div class="row" >
+					<div class="col-3">Stemgerechtigd</div>
+					<div class="col-9">
+						<span class="badge badge-success" *ngIf="member.VerifiedVotingEntitlement">Ja</span>
+						<span class="badge badge-warning" *ngIf="!member.VerifiedVotingEntitlement">Nee</span>
+					</div>
+				</div>
+				<div class="form-group row">
+					<div class="col-12" >
+						<button class="btn btn-success" type="submit"
+							[disabled]="!memberForm.valid || !memberForm.dirty" >Save</button>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="col-4" >
+			Logs
+		</div>
+	</div>
+</div>

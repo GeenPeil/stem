@@ -10,7 +10,8 @@
     "test": "tsc && concurrently \"tsc -w\" \"karma start karma.conf.js\"",
     "test-once": "tsc && karma start karma.conf.js --single-run",
     "tsc": "tsc",
-    "tsc:w": "tsc -w"
+    "tsc:w": "tsc -w",
+    "postinstall": "typings install"
   },
   "keywords": [],
   "author": "",
@@ -24,7 +25,8 @@
     "@angular/platform-browser": "~2.4.0",
     "@angular/platform-browser-dynamic": "~2.4.0",
     "@angular/router": "~3.4.0",
-    "angular-in-memory-web-api": "~0.2.4",
+    "@ng-bootstrap/ng-bootstrap": "^1.0.0-alpha.18",
+    "angular2-notifications": "^0.4.49",
     "core-js": "^2.4.1",
     "rxjs": "5.0.1",
     "systemjs": "0.19.40",
