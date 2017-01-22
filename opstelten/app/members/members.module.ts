@@ -5,11 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { CommonModule } from '../common/common.module';
-import { AuthModule } from '../auth/auth.module';
+import { ApiModule } from '../api/api.module';
 import { MembersRoutingModule } from './members-routing.module';
 
 import { MemberService } from './member.service';
-
 import { MemberComponent } from './member.component';
 
 @NgModule({
@@ -18,7 +17,7 @@ import { MemberComponent } from './member.component';
         FormsModule,
         NgbModule,
         CommonModule,
-        AuthModule,
+        ApiModule,
         MembersRoutingModule
     ],
     providers: [

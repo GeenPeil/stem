@@ -1,4 +1,3 @@
-
 import { JsonObject, JsonMember } from 'typedjson-npm';
 
 import { Date } from '../common/date';
@@ -17,7 +16,7 @@ export class Member {
     @JsonMember() phonenumber: string;
     @JsonMember() postalcode: string;
     @JsonMember() housenumber: string;
-    @JsonMember() housenumber_suffix: string;
+    @JsonMember() housenumberSuffix: string;
     @JsonMember() streetname: string;
     @JsonMember() city: string;
     @JsonMember() province: string;

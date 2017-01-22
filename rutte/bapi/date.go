@@ -46,6 +46,6 @@ func (d *Date) Scan(value interface{}) error {
 }
 
 // Value transforms Date into a date-string which can be easily converted by postgress to a date type.
-func (d *Date) Value() (driver.Value, error) {
+func (d Date) Value() (driver.Value, error) {
 	return fmt.Sprintf("%d-%d-%d", d.Year, d.Month, d.Day), nil
 }

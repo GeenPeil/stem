@@ -3,7 +3,7 @@ import { HttpModule } from '@angular/http';
 import { FormsModule } from '@angular/forms';
 
 import { CommonModule } from '../common/common.module';
-import { AuthHttp } from './auth-http.service';
+import { Api } from './api.service';
 
 
 @NgModule({
@@ -11,9 +11,7 @@ import { AuthHttp } from './auth-http.service';
         HttpModule,
         CommonModule
     ],
-    providers: [
-        AuthHttp
-    ],
+    providers: [Api],
     declarations: []
 })
-export class AuthModule { }
+export class ApiModule { }
