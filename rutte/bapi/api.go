@@ -1,4 +1,4 @@
-package api
+package bapi
 
 import (
 	"net/http"
@@ -28,21 +28,17 @@ func New(log *logrus.Entry, db *sqlx.DB) *API {
 
 // AttachChiRouter attaches API routes to the provided chi router.
 func (a *API) AttachChiRouter(r chi.Router) {
-	a.log.Infoln("attach chi router api")
+	a.log.Infoln("attach chi router bapi")
 	r.Use(middleware.NoCache)
 	r.Get("/", a.getRoot)
-	r.Post("/login", a.login())
-	r.Route("/private", func(r chi.Router) {
-		r.Use(a.newAccountAuthMiddleware())
-		r.Get("/profile", a.getProfileOverview())
-	})
+	r.Get("/member/:id", a.getMember())
 }
 
 // getRoot handles get requests to root (show api version?)
 func (a *API) getRoot(w http.ResponseWriter, r *http.Request) {
 	out := map[string]string{
-		"apiName":        "rutte-api",
-		"apiDescription": "API's for voting platform",
+		"apiName":        "rutte-bapi",
+		"apiDescription": "API's for backoffice CRUD",
 		"apiVersion":     "v0.0",
 		"appVersion":     version.String(),
 	}

@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/GeenPeil/stem/rutte/api"
+	"github.com/GeenPeil/stem/rutte/bapi"
 	"github.com/GeenPeil/stem/rutte/commonflags"
 	"github.com/GeenPeil/stem/rutte/cors"
 	"github.com/GeenPeil/stem/rutte/version"
@@ -95,6 +96,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Route("/api", api.New(log, db).AttachChiRouter)
+	r.Route("/backoffice-api", bapi.New(log, db).AttachChiRouter)
 
 	// Optionally add CORS headers to each request
 	if options.HTTPEnableWildcardCORS {

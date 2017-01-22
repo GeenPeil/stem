@@ -1,5 +1,5 @@
 /**
- * System configuration for Angular samples
+ * System configuration
  * Adjust as necessary for your application needs.
  */
 (function (global) {
@@ -22,10 +22,14 @@
       '@angular/http': 'npm:@angular/http/bundles/http.umd.js',
       '@angular/router': 'npm:@angular/router/bundles/router.umd.js',
       '@angular/forms': 'npm:@angular/forms/bundles/forms.umd.js',
+      
+      // presentation and UI
+      'angular2-notifications': 'node_modules/angular2-notifications',
+      '@ng-bootstrap/ng-bootstrap': 'node_modules/@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js',
 
       // other libraries
-      'rxjs':                      'npm:rxjs',
-      'angular-in-memory-web-api': 'npm:angular-in-memory-web-api/bundles/in-memory-web-api.umd.js'
+      'typedjson-npm': 'node_modules/typedjson-npm',
+      'rxjs': 'npm:rxjs'
     },
     // packages tells the System loader how to load when no filename and/or no extension
     packages: {
@@ -35,7 +39,13 @@
       },
       rxjs: {
         defaultExtension: 'js'
+      },
+      'angular2-notifications': {
+          main: 'components.js',
+          defaultExtension: 'js'
       }
     }
   });
 })(this);
+
+
