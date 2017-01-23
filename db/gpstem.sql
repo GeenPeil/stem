@@ -58,6 +58,7 @@ CREATE TABLE members.accounts(
 	verified_email boolean NOT NULL DEFAULT false,
 	verified_identity boolean NOT NULL DEFAULT false,
 	verified_voting_entitlement boolean NOT NULL DEFAULT false,
+	textsearch_vector tsvector,
 	CONSTRAINT accounts_pk PRIMARY KEY (id),
 	CONSTRAINT accounts_uq_email UNIQUE (email),
 	CONSTRAINT accounts_uq_nickname UNIQUE (nickname),
@@ -166,6 +167,51 @@ CREATE TABLE members.entitlement_proofs(
 );
 -- ddl-end --
 ALTER TABLE members.entitlement_proofs OWNER TO postgres;
+-- ddl-end --
+
+-- object: members.accounts_fn_update_textsearch | type: FUNCTION --
+-- DROP FUNCTION IF EXISTS members.accounts_fn_update_textsearch() CASCADE;
+CREATE FUNCTION members.accounts_fn_update_textsearch ()
+	RETURNS trigger
+	LANGUAGE plpgsql
+	VOLATILE 
+	CALLED ON NULL INPUT
+	SECURITY INVOKER
+	COST 1
+	AS $$
+BEGIN
+	NEW.textsearch_vector = to_tsvector('english', 
+		coalesce(NEW.given_name,'') || ' ' ||
+		coalesce(NEW.first_names,'') || ' ' ||
+		coalesce(NEW.initials,'') || ' ' ||
+		coalesce(NEW.last_name,'') || ' ' ||
+		coalesce(NEW.first_names,'') || ' ' ||
+		coalesce(NEW.streetname, '') || ' ' ||
+		coalesce(NEW.city, ''));
+RETURN NEW;
+END;
+
+$$;
+-- ddl-end --
+ALTER FUNCTION members.accounts_fn_update_textsearch() OWNER TO postgres;
+-- ddl-end --
+
+-- object: accounts_tr_update_textsearch | type: TRIGGER --
+-- DROP TRIGGER IF EXISTS accounts_tr_update_textsearch ON members.accounts CASCADE;
+CREATE TRIGGER accounts_tr_update_textsearch
+	BEFORE INSERT OR UPDATE
+	ON members.accounts
+	FOR EACH ROW
+	EXECUTE PROCEDURE members.accounts_fn_update_textsearch();
+-- ddl-end --
+
+-- object: accounts_index_textsearch_vector | type: INDEX --
+-- DROP INDEX IF EXISTS members.accounts_index_textsearch_vector CASCADE;
+CREATE INDEX accounts_index_textsearch_vector ON members.accounts
+	USING gin
+	(
+	  textsearch_vector
+	);
 -- ddl-end --
 
 -- object: sessions_fk_account | type: CONSTRAINT --

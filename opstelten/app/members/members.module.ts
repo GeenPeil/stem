@@ -9,6 +9,7 @@ import { ApiModule } from '../api/api.module';
 import { MembersRoutingModule } from './members-routing.module';
 
 import { MemberService } from './member.service';
+import { MemberListComponent } from './member-list.component';
 import { MemberComponent } from './member.component';
 
 @NgModule({
@@ -23,6 +24,9 @@ import { MemberComponent } from './member.component';
     providers: [
         MemberService
     ],
-    declarations: [MemberComponent]
+    declarations: [
+        MemberListComponent,
+        MemberComponent
+    ]
 })
 export class MembersModule { }
