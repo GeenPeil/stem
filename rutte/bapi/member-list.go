@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"github.com/pressly/chi/middleware"
 	"github.com/pressly/chi/render"
 )
@@ -16,6 +18,7 @@ func (a *API) getMemberList() http.HandlerFunc {
 	log.Infoln("setup")
 
 	regexpValidatePostalcode := regexp.MustCompile(`^[0-9]{4} ?[a-zA-Z]{2}$`)
+	regexpQueryReplacer := regexp.MustCompile(`([^&|])\s+([^&|])`)
 
 	const queryStart = `
 SELECT
@@ -51,7 +54,7 @@ LIMIT 100
 		log.WithError(err).Fatal("error preparing statement")
 	}
 
-	stmtMemberListByLastName, err := a.db.Preparex(queryStart + `WHERE accounts.textsearch_vector @@ to_tsquery('english', $1)` + queryEnd)
+	stmtMemberListByTextsearch, err := a.db.Preparex(queryStart + `WHERE accounts.textsearch_vector @@ to_tsquery('english', $1)` + queryEnd)
 	if err != nil {
 		log.WithError(err).Fatal("error preparing statement")
 	}
@@ -65,6 +68,7 @@ LIMIT 100
 	}
 
 	type OutMemberList struct {
+		Error   string      `json:"error"`
 		Members []OutMember `json:"members"`
 	}
 
@@ -82,6 +86,7 @@ LIMIT 100
 		if searchQuery[0] == '@' {
 			// search by nickname
 			queryStatement = stmtMemberListByNickname
+			searchQuery = searchQuery[1:]
 		} else if _, err := strconv.ParseUint(searchQuery, 10, 64); err == nil {
 			queryStatement = stmtMemberListByID
 		} else if regexpValidateEmailAddress.MatchString(searchQuery) {
@@ -90,15 +95,24 @@ LIMIT 100
 			if len(searchQuery) == 7 && searchQuery[4] == ' ' {
 				searchQuery = searchQuery[0:3] + searchQuery[5:6]
 			}
+			searchQuery = strings.ToUpper(searchQuery)
 			queryStatement = stmtMemberListByPostalcode
 		} else {
-			queryStatement = stmtMemberListByLastName
+			queryStatement = stmtMemberListByTextsearch
+			searchQuery = regexpQueryReplacer.ReplaceAllString(searchQuery, "$1 & $2")
 		}
 
 		out := &OutMemberList{}
 		res, err := queryStatement.Queryx(searchQuery)
 		if err != nil {
-			log.WithError(err).Error("error scanning row into struct")
+			if perr, ok := err.(*pq.Error); ok {
+				if strings.HasPrefix(perr.Message, `syntax error in tsquery`) ||
+					strings.HasPrefix(perr.Message, `no operand in tsquery`) {
+					out.Error = `rutte:query_error`
+					goto Done
+				}
+			}
+			log.WithError(err).Error("error querying db")
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
 		}
@@ -118,6 +132,7 @@ LIMIT 100
 			return
 		}
 
+	Done:
 		render.JSON(w, r, out)
 	}
 }

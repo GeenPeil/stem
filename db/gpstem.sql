@@ -205,6 +205,10 @@ CREATE TRIGGER accounts_tr_update_textsearch
 	EXECUTE PROCEDURE members.accounts_fn_update_textsearch();
 -- ddl-end --
 
+-- Appended SQL commands --
+UPDATE members.accounts SET id = id;
+-- ddl-end --
+
 -- object: accounts_index_textsearch_vector | type: INDEX --
 -- DROP INDEX IF EXISTS members.accounts_index_textsearch_vector CASCADE;
 CREATE INDEX accounts_index_textsearch_vector ON members.accounts
