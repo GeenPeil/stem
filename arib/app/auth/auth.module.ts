@@ -7,6 +7,7 @@ import { AuthRoutingModule } from './auth-routing.module';
 import { Auth } from './auth.service';
 
 import { LoginComponent } from './login.component';
+import { LogoutComponent } from './logout.component';
 
 @NgModule({
 	imports: [
@@ -19,7 +20,8 @@ import { LoginComponent } from './login.component';
 		Auth
 	],
 	declarations: [
-		LoginComponent
+		LoginComponent,
+		LogoutComponent
 	]
 })
 export class AuthModule { }

@@ -40,6 +40,14 @@ export class Auth {
 			}).catch((error: any) => {
 				return Observable.throw(error._body);
 			});
-
+	}
+	logout() {
+		return this.http.post(this.config.apiURL + "/api/logout", JSON.stringify(this.session))
+			.map((data: Response) => {
+				this.session = null;
+				return data.json();
+			}).catch((error: any) => {
+				return Observable.throw(error._body);
+			});
 	}
 }

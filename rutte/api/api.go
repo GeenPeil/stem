@@ -32,6 +32,7 @@ func (a *API) AttachChiRouter(r chi.Router) {
 	r.Use(middleware.NoCache)
 	r.Get("/", a.getRoot)
 	r.Post("/login", a.login())
+	r.Post("/logout", a.logout())
 	r.Route("/private", func(r chi.Router) {
 		r.Use(a.newAccountAuthMiddleware())
 		r.Get("/profile", a.getProfileOverview())

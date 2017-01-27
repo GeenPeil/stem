@@ -4,9 +4,20 @@ import { Auth } from './auth.service';
 
 @Component({
 	template: `
-		{{errorMessage}} | {{successMessage}}
-		<input [(ngModel)]="id" type="number" >
-		<button (click)="login()" >Log in</button>
+		<div *ngIf="errorMessage" >
+			Er was een probleem.<br/>
+			{{errorMessage}}
+		</div>
+
+		<div *ngIf="successMessage" >
+			{{successMessage}}<br/>
+			<a routerLink="/profile" >Ga naar je profiel.</a>
+		</div>
+
+		<div *ngIf="!auth.IsLoggedIn()" >
+			<input [(ngModel)]="id" type="number" >
+			<button (click)="login()" >Log in</button>
+		</div>
 	`,
 })
 export class LoginComponent {

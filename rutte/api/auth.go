@@ -115,3 +115,53 @@ func (a *API) login() http.HandlerFunc {
 		render.JSON(w, r, &out)
 	}
 }
+
+func (a *API) logout() http.HandlerFunc {
+	log := a.log.WithField("handler", "logout")
+	log.Infoln("setup")
+
+	stmtDeleteSession, err := a.db.PrepareNamed(`DELETE FROM members.sessions WHERE id = :id AND token = :token`)
+	if err != nil {
+		log.WithError(err).Fatal("error preparing statement")
+	}
+
+	type InSession struct {
+		ID    uint64 `json:"id"`
+		Token string `json:"token"`
+	}
+
+	type OutError struct {
+		Error string `json:"error"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		log := log.WithField("requestID", middleware.GetReqID(r.Context()))
+
+		in := InSession{}
+		defer r.Body.Close()
+		err = json.NewDecoder(r.Body).Decode(&in)
+		if err != nil {
+			log.WithError(err).Error("error decoding json")
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+
+		var out = OutError{}
+		res, err := stmtDeleteSession.Exec(in)
+		if err != nil {
+			log.WithError(err).Error("error deleting session")
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+		affected, err := res.RowsAffected()
+		if err != nil {
+			log.WithError(err).Error("error deleting session")
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+		if affected == 0 {
+			out.Error = `rutte:no_session_found`
+		}
+		render.JSON(w, r, &out)
+	}
+}

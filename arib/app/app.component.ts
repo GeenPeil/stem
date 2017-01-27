@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 
+import { Auth } from './auth/auth.service';
+
 @Component({
 	selector: 'gp-arib',
 	template: `
@@ -13,9 +15,10 @@ import { Component } from '@angular/core';
 			<a class="navbar-brand" href="#">GeenPeil</a>
 			<div [ngbCollapse]="isNavbarCollapsed" class="collapse navbar-collapse" id="navbarNavAltMarkup">
 				<div class="navbar-nav">
-					<a class="nav-item nav-link" routerLinkActive="active" routerLink="/does-not-exist">Does not exist</a>
-					<a class="nav-item nav-link" routerLinkActive="active" routerLink="/profile">Profile</a>
-					<a class="nav-item nav-link" routerLinkActive="active" routerLink="/login">Login</a>
+					<a class="nav-item nav-link" routerLinkActive="active" *ngIf="!auth.isLoggedIn()"  routerLink="/lid-worden">Lid worden</a>
+					<a class="nav-item nav-link" routerLinkActive="active" *ngIf="!auth.isLoggedIn()" routerLink="/login">Login</a>
+					<a class="nav-item nav-link" routerLinkActive="active" *ngIf="auth.isLoggedIn()" routerLink="/profile">Profile</a>
+					<a class="nav-item nav-link" routerLinkActive="active" *ngIf="auth.isLoggedIn()" routerLink="/logout">Logout</a>
 				</div>
 			</div>
 		</nav>
@@ -25,4 +28,6 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
 	isNavbarCollapsed = true;
+
+	constructor(private auth: Auth) { };
 }
