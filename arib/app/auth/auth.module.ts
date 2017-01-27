@@ -10,18 +10,18 @@ import { AuthHttp } from './auth-http.service';
 import { LoginComponent } from './login.component';
 
 @NgModule({
-    imports: [
-        FormsModule,
-        HttpModule,
-        CommonModule,
-        AuthRoutingModule
-    ],
-    providers: [
-        Auth,
-        AuthHttp
-    ],
-    declarations: [
-        LoginComponent
-    ]
+	imports: [
+		FormsModule,
+		HttpModule,
+		CommonModule,
+		AuthRoutingModule
+	],
+	providers: [
+		Auth,
+		AuthHttp
+	],
+	declarations: [
+		LoginComponent
+	]
 })
 export class AuthModule { }

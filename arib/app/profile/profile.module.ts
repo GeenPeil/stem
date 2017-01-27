@@ -9,16 +9,16 @@ import { ProfileRoutingModule } from './profile-routing.module';
 import { ProfileComponent } from './profile.component';
 
 @NgModule({
-    imports: [
-        FormsModule,
-        CommonModule,
-        HttpModule,
-        AuthModule,
-        ProfileRoutingModule
-    ],
-    providers: [],
-    declarations: [
-        ProfileComponent
-    ]
+	imports: [
+		FormsModule,
+		CommonModule,
+		HttpModule,
+		AuthModule,
+		ProfileRoutingModule
+	],
+	providers: [],
+	declarations: [
+		ProfileComponent
+	]
 })
 export class ProfileModule { }

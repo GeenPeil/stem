@@ -13,18 +13,18 @@ import { PageNotFoundComponent } from './not-found.component';
 import './rxjs-operators';
 
 @NgModule({
-    imports: [
-        BrowserModule,
-        FormsModule,
-        AuthModule,
-        ProfileModule,
-        AppRoutingModule
-    ],
-    providers: [],
-    declarations: [
-        AppComponent,
-        PageNotFoundComponent
-    ],
-    bootstrap: [AppComponent]
+	imports: [
+		BrowserModule,
+		FormsModule,
+		AuthModule,
+		ProfileModule,
+		AppRoutingModule
+	],
+	providers: [],
+	declarations: [
+		AppComponent,
+		PageNotFoundComponent
+	],
+	bootstrap: [AppComponent]
 })
 export class AppModule { }
