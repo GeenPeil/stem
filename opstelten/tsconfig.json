@@ -11,6 +11,9 @@
 		"suppressImplicitAnyIndexErrors": true,
 		"outDir": "dist"
 	},
+	"formatCodeOptions": {
+		"convertTabsToSpaces": false
+	},
 	"exclude": [
 		"node_modules"
 	],

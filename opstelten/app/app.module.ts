@@ -16,10 +16,10 @@ import './rxjs-operators';
 @NgModule({
     imports: [
         BrowserModule,
-        
+
         NgbModule.forRoot(),
         SimpleNotificationsModule,
-        
+
         MembersModule,
         AppRoutingModule
     ],

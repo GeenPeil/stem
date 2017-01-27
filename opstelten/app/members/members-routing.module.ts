@@ -5,16 +5,16 @@ import { MemberListComponent } from './member-list.component';
 import { MemberComponent } from './member.component';
 
 const membersRoutes: Routes = [
-    { path: 'members', component: MemberListComponent },
-    { path: 'member/:id', component: MemberComponent }
+	{ path: 'members', component: MemberListComponent },
+	{ path: 'member/:id', component: MemberComponent }
 ];
 
 @NgModule({
-    imports: [
-        RouterModule.forChild(membersRoutes)
-    ],
-    exports: [
-        RouterModule
-    ]
+	imports: [
+		RouterModule.forChild(membersRoutes)
+	],
+	exports: [
+		RouterModule
+	]
 })
 export class MembersRoutingModule { }
