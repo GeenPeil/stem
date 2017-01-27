@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 
-import { Auth } from '../auth/auth.service';
-import { AuthHttp } from '../auth/auth-http.service';
+import { Api } from '../api/api.service';
+
+import { Profile } from './profile';
 
 @Component({
 	template: `
@@ -10,31 +11,24 @@ import { AuthHttp } from '../auth/auth-http.service';
 			<p>error: {{error}}</p>
 			<button (click)="fetchProfile()">Retry</button>
 		</div>
-		<div>
-			<h1 *ngIf="nickname">{{nickname}} (member ID: {{userId}})</h1>
-			<p *ngIf="email">Email: {{email}}</p>
+		<div *ngIf="profile">
+			<h1>{{profile.nickname}} (member ID: {{profile.id}})</h1>
+			<p>Email: {{profile.email}}</p>
 		</div>
 	`,
 })
 export class ProfileComponent {
-	email = '';
-	error: Error = null;
-	nickname = '';
-	userId = 0;
+	error: Error;
+	profile: Profile;
 
-	constructor(private auth: Auth, private http: AuthHttp) {
-		this.userId = auth.getUserId();
-
+	constructor(private api: Api) {
 		this.fetchProfile();
 	}
 
 	private fetchProfile() {
-		this.http.get("private/profile").subscribe(
-			data => {
-				this.nickname = data.profile.nickname;
-				this.email = data.profile.email;
-			},
-			error => this.error = error
+		this.api.get(Profile, "private/profile").subscribe(
+			(profile: Profile) => this.profile = profile,
+			(error: Error) => this.error = error
 		);
 	}
 }

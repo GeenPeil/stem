@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '../common/common.module';
 import { AuthRoutingModule } from './auth-routing.module';
 import { Auth } from './auth.service';
-import { AuthHttp } from './auth-http.service';
 
 import { LoginComponent } from './login.component';
 
@@ -17,8 +16,7 @@ import { LoginComponent } from './login.component';
 		AuthRoutingModule
 	],
 	providers: [
-		Auth,
-		AuthHttp
+		Auth
 	],
 	declarations: [
 		LoginComponent

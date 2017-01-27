@@ -3,7 +3,7 @@ import { HttpModule } from '@angular/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-import { AuthModule } from '../auth/auth.module';
+import { ApiModule } from '../api/api.module';
 import { ProfileRoutingModule } from './profile-routing.module';
 
 import { ProfileComponent } from './profile.component';
@@ -13,7 +13,7 @@ import { ProfileComponent } from './profile.component';
 		FormsModule,
 		CommonModule,
 		HttpModule,
-		AuthModule,
+		ApiModule,
 		ProfileRoutingModule
 	],
 	providers: [],
