@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
-import { HttpModule } from '@angular/http';
-import { FormsModule } from '@angular/forms';
+
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpModule } from '@angular/http';
 
 import { ApiModule } from '../api/api.module';
 import { ProfileRoutingModule } from './profile-routing.module';
@@ -10,9 +11,10 @@ import { ProfileComponent } from './profile.component';
 
 @NgModule({
 	imports: [
-		FormsModule,
 		CommonModule,
+		FormsModule,
 		HttpModule,
+
 		ApiModule,
 		ProfileRoutingModule
 	],

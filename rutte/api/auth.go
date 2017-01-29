@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/GeenPeil/stem/rutte/api/token"
-	"github.com/lib/pq"
 
+	"github.com/lib/pq"
 	"github.com/pressly/chi/middleware"
 	"github.com/pressly/chi/render"
 )

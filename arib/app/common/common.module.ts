@@ -7,4 +7,4 @@ import { ConfigService } from './config.service';
 	providers: [ConfigService],
 	declarations: []
 })
-export class CommonModule { }
+export class Common { }

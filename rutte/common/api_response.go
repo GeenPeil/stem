@@ -1,4 +1,4 @@
-package bapi
+package common
 
 import "github.com/lib/pq"
 
@@ -11,14 +11,15 @@ type APIResponse struct {
 }
 
 // NewAPIResponse creates a new emptry API response.
-func NewAPIResponse() *APIResponse {
-	return &APIResponse{
+func NewAPIResponse() APIResponse {
+	return APIResponse{
 		Errors: make([]string, 0),
 	}
 }
 
 // CheckPgErr checks an error. If it's a postgres error of a kind that is handled in the front-end,
 // an error code is added to the API response object and the function returns true.
+// TODO: accept a whitelist of database constraints and violations that can go through to the frontend.
 func (cr *APIResponse) CheckPgErr(err error) bool {
 	if perr, ok := err.(*pq.Error); ok {
 		switch perr.Code.Name() {

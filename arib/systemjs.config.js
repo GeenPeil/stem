@@ -24,6 +24,7 @@
       '@angular/forms': 'npm:@angular/forms/bundles/forms.umd.js',
 
       '@ng-bootstrap/ng-bootstrap': 'node_modules/@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js',
+      'ng2-webstorage': 'node_modules/ng2-webstorage',
 
       // other libraries
       'typedjson-npm': 'node_modules/typedjson-npm',
@@ -40,6 +41,10 @@
       },
       'node_modules/typedjson-npm': {
         main: 'js/typed-json.js',
+        defaultExtension: 'js'
+      },
+      'ng2-webstorage': {
+        main: 'bundles/core.umd.js',
         defaultExtension: 'js'
       }
     }

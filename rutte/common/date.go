@@ -1,4 +1,4 @@
-package bapi
+package common
 
 import (
 	"database/sql/driver"

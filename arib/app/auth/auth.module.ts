@@ -1,8 +1,10 @@
 import { NgModule } from '@angular/core';
+
+import { CommonModule } from '@angular/common';
 import { HttpModule } from '@angular/http';
 import { FormsModule } from '@angular/forms';
 
-import { CommonModule } from '../common/common.module';
+import { Common } from '../common/common.module';
 import { AuthRoutingModule } from './auth-routing.module';
 import { Auth } from './auth.service';
 
@@ -11,9 +13,12 @@ import { LogoutComponent } from './logout.component';
 
 @NgModule({
 	imports: [
+		CommonModule,
 		FormsModule,
 		HttpModule,
-		CommonModule,
+
+		Common,
+
 		AuthRoutingModule
 	],
 	providers: [

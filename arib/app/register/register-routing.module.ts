@@ -4,7 +4,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { RegisterComponent } from './register.component';
 
 const registerRoutes: Routes = [
-	{ path: 'lid-worden', component: RegisterComponent }
+	{ path: 'lid-worden', component: RegisterComponent },
+	{ path: 'lid-worden/:step', component: RegisterComponent }
 ];
 @NgModule({
 	imports: [

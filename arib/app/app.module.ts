@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { Ng2Webstorage } from 'ng2-webstorage';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AuthModule } from './auth/auth.module';
@@ -18,9 +18,9 @@ import './rxjs-operators';
 @NgModule({
 	imports: [
 		BrowserModule,
-		FormsModule,
 
 		NgbModule.forRoot(),
+		Ng2Webstorage.forRoot({ prefix: 'gpiac-arib', separator: '.' }),
 
 		AuthModule,
 		RegisterModule,

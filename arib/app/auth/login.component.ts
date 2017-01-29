@@ -14,7 +14,7 @@ import { Auth } from './auth.service';
 			<a routerLink="/profile" >Ga naar je profiel.</a>
 		</div>
 
-		<div *ngIf="!auth.IsLoggedIn()" >
+		<div *ngIf="!auth.isLoggedIn()" >
 			<input [(ngModel)]="id" type="number" >
 			<button (click)="login()" >Log in</button>
 		</div>

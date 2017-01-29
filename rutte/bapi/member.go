@@ -3,17 +3,13 @@ package bapi
 import (
 	"encoding/json"
 	"net/http"
-	"regexp"
 	"strconv"
 
+	"github.com/GeenPeil/stem/rutte/common"
 	"github.com/pressly/chi"
 	"github.com/pressly/chi/middleware"
 	"github.com/pressly/chi/render"
 )
-
-// regexpValidateEmailAddress is just a very simple regular expression to catch 99% of user input mistakes.
-// Email addresses in the system are always validated by actually sending a verification email to it.
-var regexpValidateEmailAddress = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
 // postMember a new member into the database
 func (a *API) postMember() http.HandlerFunc {
@@ -37,7 +33,7 @@ func (a *API) postMember() http.HandlerFunc {
 			streetname,
 			city,
 			province,
-			country
+			country_id
 		) VALUES (
 			:email,
 			:nickname,
@@ -53,28 +49,28 @@ func (a *API) postMember() http.HandlerFunc {
 			:streetname,
 			:city,
 			:province,
-			:country
+			:country_id
 		) RETURNING id`)
 	if err != nil {
 		log.WithError(err).Fatal("error preparing statement")
 	}
 
 	type InMember struct {
-		Email             string  `json:"email"`
-		Nickname          *string `json:"nickname"`
-		GivenName         string  `json:"givenName"`
-		FirstNames        string  `json:"firstNames"`
-		Initials          string  `json:"initials"`
-		LastName          string  `json:"lastName"`
-		Birthdate         Date    `json:"birthdate"`
-		Phonenumber       string  `json:"phonenumber"`
-		Postalcode        string  `json:"postalcode"`
-		Housenumber       string  `json:"housenumber"`
-		HousenumberSuffix string  `json:"housenumberSuffix"`
-		Streetname        string  `json:"streetname"`
-		City              string  `json:"city"`
-		Province          string  `json:"province"`
-		Country           string  `json:"country"`
+		Email             string      `json:"email"`
+		Nickname          *string     `json:"nickname"`
+		GivenName         string      `json:"givenName"`
+		FirstNames        string      `json:"firstNames"`
+		Initials          string      `json:"initials"`
+		LastName          string      `json:"lastName"`
+		Birthdate         common.Date `json:"birthdate"`
+		Phonenumber       string      `json:"phonenumber"`
+		Postalcode        string      `json:"postalcode"`
+		Housenumber       string      `json:"housenumber"`
+		HousenumberSuffix string      `json:"housenumberSuffix"`
+		Streetname        string      `json:"streetname"`
+		City              string      `json:"city"`
+		Province          string      `json:"province"`
+		CountryID         *uint64     `json:"country_id"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -90,8 +86,8 @@ func (a *API) postMember() http.HandlerFunc {
 			return
 		}
 
-		response := NewAPIResponse()
-		if !regexpValidateEmailAddress.MatchString(in.Email) {
+		response := common.NewAPIResponse()
+		if !common.RegexpValidateEmailAddress.MatchString(in.Email) {
 			response.AddErrorCode(`rutte:invalid_email_address`)
 			goto Done
 		}
@@ -130,7 +126,7 @@ func (a *API) getMember() http.HandlerFunc {
 			accounts.streetname,
 			accounts.city,
 			accounts.province,
-			accounts.country,
+			accounts.country_id,
 			to_char(accounts.fee_last_payment_date, 'YYYY-MM-DD') AS fee_last_payment_date,
 			accounts.fee_paid,
 			accounts.is_adult,
@@ -144,28 +140,28 @@ func (a *API) getMember() http.HandlerFunc {
 	}
 
 	type OutMemberDetails struct {
-		ID                        uint64  `json:"id"`
-		Email                     string  `json:"email"`
-		Nickname                  *string `json:"nickname"`
-		GivenName                 string  `json:"givenName"`
-		FirstNames                string  `json:"firstNames"`
-		Initials                  string  `json:"initials"`
-		LastName                  string  `json:"lastName"`
-		Birthdate                 Date    `json:"birthdate"`
-		IsAdult                   bool    `json:"isAdult"`
-		Phonenumber               string  `json:"phonenumber"`
-		Postalcode                string  `json:"postalcode"`
-		Housenumber               string  `json:"housenumber"`
-		HousenumberSuffix         string  `json:"housenumberSuffix"`
-		Streetname                string  `json:"streetname"`
-		City                      string  `json:"city"`
-		Province                  string  `json:"province"`
-		Country                   string  `json:"country"`
-		FeeLastPaymentDate        *Date   `json:"feeLastPaymentDate"`
-		FeePaid                   bool    `json:"feePaid"`
-		VerifiedEmail             bool    `json:"verifiedEmail"`
-		VerifiedIdentity          bool    `json:"verifiedIdentity"`
-		VerifiedVotingEntitlement bool    `json:"verifiedVotingEntitlement"`
+		ID                        uint64       `json:"id"`
+		Email                     string       `json:"email"`
+		Nickname                  *string      `json:"nickname"`
+		GivenName                 string       `json:"givenName"`
+		FirstNames                string       `json:"firstNames"`
+		Initials                  string       `json:"initials"`
+		LastName                  string       `json:"lastName"`
+		Birthdate                 common.Date  `json:"birthdate"`
+		IsAdult                   bool         `json:"isAdult"`
+		Phonenumber               string       `json:"phonenumber"`
+		Postalcode                string       `json:"postalcode"`
+		Housenumber               string       `json:"housenumber"`
+		HousenumberSuffix         string       `json:"housenumberSuffix"`
+		Streetname                string       `json:"streetname"`
+		City                      string       `json:"city"`
+		Province                  string       `json:"province"`
+		CountryID                 *uint64      `json:"country_id"`
+		FeeLastPaymentDate        *common.Date `json:"feeLastPaymentDate"`
+		FeePaid                   bool         `json:"feePaid"`
+		VerifiedEmail             bool         `json:"verifiedEmail"`
+		VerifiedIdentity          bool         `json:"verifiedIdentity"`
+		VerifiedVotingEntitlement bool         `json:"verifiedVotingEntitlement"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -197,42 +193,41 @@ func (a *API) putMember() http.HandlerFunc {
 
 	stmtPutMember, err := a.db.PrepareNamed(`
 		UPDATE members.accounts
-		SET
-			nickname = :nickname,
-			given_name = :given_name,
-			first_names = :first_names,
-			initials = :initials,
-			last_name = :last_name,
-			birthdate = CAST(:birthdate AS date),
-			phonenumber = :phonenumber,
-			postalcode = :postalcode,
-			housenumber = :housenumber,
-			housenumber_suffix = :housenumber_suffix,
-			streetname = :streetname,
-			city = :city,
-			province = :province,
-			country = :country
+		SET nickname = :nickname
+		  , given_name = :given_name
+		  , first_names = :first_names
+		  , initials = :initials
+		  , last_name = :last_name
+		  , birthdate = CAST(:birthdate AS date)
+		  , phonenumber = :phonenumber
+		  , postalcode = :postalcode
+		  , housenumber = :housenumber
+		  , housenumber_suffix = :housenumber_suffix
+		  , streetname = :streetname
+		  , city = :city
+		  , province = :province
+		  , country_id = :country_id
 		WHERE id = :id`)
 	if err != nil {
 		log.WithError(err).Fatal("error preparing statement")
 	}
 
 	type InMember struct {
-		ID                uint64  `json:"id"`
-		Nickname          *string `json:"nickname"`
-		GivenName         string  `json:"givenName"`
-		FirstNames        string  `json:"firstNames"`
-		Initials          string  `json:"initials"`
-		LastName          string  `json:"lastName"`
-		Birthdate         Date    `json:"birthdate"`
-		Phonenumber       string  `json:"phonenumber"`
-		Postalcode        string  `json:"postalcode"`
-		Housenumber       string  `json:"housenumber"`
-		HousenumberSuffix string  `json:"housenumberSuffix"`
-		Streetname        string  `json:"streetname"`
-		City              string  `json:"city"`
-		Province          string  `json:"province"`
-		Country           string  `json:"country"`
+		ID                uint64      `json:"id"`
+		Nickname          *string     `json:"nickname"`
+		GivenName         string      `json:"givenName"`
+		FirstNames        string      `json:"firstNames"`
+		Initials          string      `json:"initials"`
+		LastName          string      `json:"lastName"`
+		Birthdate         common.Date `json:"birthdate"`
+		Phonenumber       string      `json:"phonenumber"`
+		Postalcode        string      `json:"postalcode"`
+		Housenumber       string      `json:"housenumber"`
+		HousenumberSuffix string      `json:"housenumberSuffix"`
+		Streetname        string      `json:"streetname"`
+		City              string      `json:"city"`
+		Province          string      `json:"province"`
+		CountryID         *uint64     `json:"country_id"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -262,7 +257,7 @@ func (a *API) putMember() http.HandlerFunc {
 
 		}
 
-		response := NewAPIResponse()
+		response := common.NewAPIResponse()
 		_, err = stmtPutMember.Exec(in)
 		if err != nil && !response.CheckPgErr(err) {
 			log.WithError(err).Error("error scanning row into struct")
