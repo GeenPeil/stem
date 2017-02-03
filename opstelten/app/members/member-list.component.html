@@ -1,0 +1,38 @@
+
+<div class="container" >
+	<div class="row">&nbsp;</div>
+	<div class="form-group row">
+		<label for="searchQuery" class="col-1 col-form-label">Search:</label>
+		<div class="col-8">
+			<input class="form-control" id="searchQuery" [(ngModel)]="searchQuery" (keyup)="search()" type="text" placeholder="postcode OF email OF @nickname OF random zoekwoorden">
+			<div class="alert alert-danger" role="alert" *ngIf="(memberList|async)?.error == 'rutte:query_error'" >
+				<strong>Oeps!</strong> Ongeldige zoekopdracht.
+			</div>
+		</div>
+		<div class="col-3 actions" >
+			<a class="btn btn-success" routerLink="/member/new" >Create member</a>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12" >
+			<table class="table table-striped" >
+				<thead class="thead-default">
+					<tr>
+						<th>Lidnr</th>
+						<th>Roepnaam</th>
+						<th>Naam</th>
+						<th>Nickname</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let member of (memberList | async)?.members" >
+						<td><a routerLink="/member/{{member.id}}">{{member.id}}</a></td>
+						<td>{{member.givenName}}</td>
+						<td><a routerLink="/member/{{member.id}}">{{member.officialName()}}</a></td>
+						<td>{{member.nickname}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

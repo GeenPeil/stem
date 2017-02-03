@@ -26,8 +26,12 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="postgres"/>
 	<appended-sql><![CDATA[CREATE OR REPLACE FUNCTION is_adult(members.accounts) RETURNS boolean AS $$
 	SELECT date_part('year', age($1.birthdate)) >= 18
+$$ VOLATILE LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION fee_paid(members.accounts) RETURNS boolean AS $$
+	SELECT coalesce(date_part('year', age($1.fee_last_payment_date)) < 1, false)
 $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
-	<position x="120" y="160"/>
+	<position x="120" y="120"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -36,11 +40,12 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	</column>
 	<column name="nickname">
 		<type name="varchar" length="30"/>
+		<comment><![CDATA[When NULL, user has never chosen a nickname.]]></comment>
 	</column>
-	<column name="given_name">
+	<column name="given_name" not-null="true" default-value="''">
 		<type name="varchar" length="100"/>
 	</column>
-	<column name="first_names">
+	<column name="first_names" not-null="true" default-value="''">
 		<type name="varchar" length="200"/>
 		<comment><![CDATA[Separated by space]]></comment>
 	</column>
@@ -55,32 +60,33 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<column name="birthdate" not-null="true">
 		<type name="date" length="1"/>
 	</column>
-	<column name="phonenumber">
+	<column name="phonenumber" not-null="true" default-value="''">
 		<type name="varchar" length="15"/>
 	</column>
-	<column name="postalcode">
+	<column name="postalcode" not-null="true" default-value="''">
 		<type name="varchar" length="10"/>
 	</column>
-	<column name="housenumber">
+	<column name="housenumber" not-null="true" default-value="''">
 		<type name="varchar" length="10"/>
 	</column>
-	<column name="housenumber_suffix">
+	<column name="housenumber_suffix" not-null="true" default-value="''">
 		<type name="varchar" length="10"/>
 	</column>
-	<column name="streetname">
+	<column name="streetname" not-null="true" default-value="''">
 		<type name="varchar" length="200"/>
 	</column>
-	<column name="city">
+	<column name="city" not-null="true" default-value="''">
 		<type name="varchar" length="200"/>
 	</column>
-	<column name="province">
+	<column name="province" not-null="true" default-value="''">
 		<type name="varchar" length="100"/>
 	</column>
-	<column name="country">
+	<column name="country" not-null="true" default-value="''">
 		<type name="varchar" length="100"/>
 	</column>
-	<column name="last_payment_date" not-null="true">
+	<column name="fee_last_payment_date">
 		<type name="date" length="1"/>
+		<comment><![CDATA[When set to NULL, member has never paid.]]></comment>
 	</column>
 	<column name="verified_email" not-null="true" default-value="false">
 		<type name="boolean" length="1"/>
@@ -91,14 +97,27 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<column name="verified_voting_entitlement" not-null="true" default-value="false">
 		<type name="boolean" length="1"/>
 	</column>
+	<column name="textsearch_vector">
+		<type name="tsvector" length="0"/>
+	</column>
 	<constraint name="accounts_pk" type="pk-constr" table="members.accounts">
 		<columns names="id" ref-type="src-columns"/>
 	</constraint>
 	<constraint name="accounts_uq_email" type="uq-constr" table="members.accounts">
 		<columns names="email" ref-type="src-columns"/>
 	</constraint>
+	<constraint name="accounts_uq_nickname" type="uq-constr" table="members.accounts">
+		<columns names="nickname" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="accounts_check_nickname_length" type="ck-constr" table="members.accounts">
+			<expression><![CDATA[char_length(nickname) > 3]]></expression>
+	</constraint>
+	<constraint name="accounts_check_age_over_14" type="ck-constr" table="members.accounts">
+			<expression><![CDATA[date_part('year', age(birthdate)) >= 14]]></expression>
+		<comment><![CDATA[One can only become a member at age 14 or older.]]></comment>
+	</constraint>
 	<initial-data>
-<![CDATA[id•email•nickname•given_name•first_names•initials•last_name•birthdate•phonenumber•postalcode•housenumber•housenumber_suffix•streetname•city•province•country•last_payment_date•verified_email•verified_identity•verified_voting_entitlement⸣
+<![CDATA[id•email•nickname•given_name•first_names•initials•last_name•birthdate•phonenumber•postalcode•housenumber•housenumber_suffix•streetname•city•province•country•fee_last_payment_date•verified_email•verified_identity•verified_voting_entitlement⸣
 1•geertjohan@geertjohan.net•GeertJohan•Geert-Johan•Geert Johan•GJ•Riemer•01-01-1990•31612345678•1234AB•10•A•Somestreet•Peilstad•Noord-Holland•Nederland•2017-01-01•f•f•f]]>
 	</initial-data>
 </table>
@@ -148,7 +167,7 @@ END;]]></definition>
 <table name="sessions">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="840" y="140"/>
+	<position x="840" y="80"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -169,7 +188,7 @@ END;]]></definition>
 <table name="entitlement_proofs">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="840" y="340"/>
+	<position x="840" y="280"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -189,6 +208,48 @@ END;]]></definition>
 		<columns names="filename" ref-type="src-columns"/>
 	</constraint>
 </table>
+
+<function name="accounts_fn_update_textsearch"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="members"/>
+	<role name="postgres"/>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="trigger" length="0"/>
+	</return-type>
+	<definition><![CDATA[BEGIN
+	NEW.textsearch_vector = to_tsvector('english', 
+		coalesce(NEW.given_name,'') || ' ' ||
+		coalesce(NEW.first_names,'') || ' ' ||
+		coalesce(NEW.initials,'') || ' ' ||
+		coalesce(NEW.last_name,'') || ' ' ||
+		coalesce(NEW.first_names,'') || ' ' ||
+		coalesce(NEW.streetname, '') || ' ' ||
+		coalesce(NEW.city, ''));
+RETURN NEW;
+END;
+]]></definition>
+</function>
+
+<trigger name="accounts_tr_update_textsearch" firing-type="BEFORE" per-line="true" constraint="false"
+	 ins-event="true" del-event="false" upd-event="true" trunc-event="false"
+	 table="members.accounts">
+		<function signature="members.accounts_fn_update_textsearch()"/>
+</trigger>
+
+<index name="accounts_index_textsearch_vector" table="members.accounts"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="gin" factor="0">
+		<idxelement use-sorting="false">
+			<column name="textsearch_vector"/>
+		</idxelement>
+</index>
 
 <constraint name="sessions_fk_account" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="CASCADE" del-action="CASCADE" ref-table="members.accounts" table="members.sessions">

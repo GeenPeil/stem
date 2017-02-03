@@ -3,10 +3,8 @@ import { HttpModule } from '@angular/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-import { Auth } from '../auth/auth.service';
 import { AuthModule } from '../auth/auth.module';
 import { ProfileRoutingModule } from './profile-routing.module';
-import { AuthHttp } from '../auth/auth-http.service';
 
 import { ProfileComponent } from './profile.component';
 
@@ -18,10 +16,7 @@ import { ProfileComponent } from './profile.component';
         AuthModule,
         ProfileRoutingModule
     ],
-    providers: [
-        Auth,
-        AuthHttp
-    ],
+    providers: [],
     declarations: [
         ProfileComponent
     ]
