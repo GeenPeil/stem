@@ -90,6 +90,9 @@ export class RegisterComponent {
 	// saveInProgress indicates that a save call is being made. locks forms
 	saveInProgress: boolean = null;
 
+	// viaLink
+	viaLink: boolean = false;
+
 	// member details during registration
 	@SessionStorage('register.member')
 	public member: MemberRegistration; // TODO: needs to be public?
@@ -112,6 +115,16 @@ export class RegisterComponent {
 	) {
 		if (this.member == null) {
 			this.member = new MemberRegistration();
+			let params = this.parseQueryString();
+			console.log(params['gn']);
+			if (params['gn'] != undefined) {
+				this.member.givenName = params['gn'];
+				if (params['ln'] != undefined) {
+					this.member.lastName = params['ln'];
+				}
+				this.viaLink = true;
+				this.member = this.member;
+			}
 		}
 		console.dir(this.member);
 
@@ -173,7 +186,6 @@ export class RegisterComponent {
 		errors.forEach((error: any) => {
 			switch (error) {
 				case 'rutte:invalid_email_address':
-				case 'pgerr:accounts_uq_email':
 				case 'pgerr:check_violation:accounts_check_age_over_14':
 					// handled by form
 					break;
@@ -257,4 +269,18 @@ export class RegisterComponent {
 			console.log(responseStep3.payment_url);
 		}).catch((error: any) => alert(error));
 	}
+
+	private parseQueryString() {
+		var str = window.location.search;
+		var objURL = {};
+
+		str.replace(
+			new RegExp("([^?=&]+)(=([^&]*))?", "g"),
+			($0, $1, $2, $3): string => {
+				objURL[$1] = $3;
+				return "";
+			}
+		);
+		return objURL;
+	};
 }

@@ -5,7 +5,7 @@
 			<ul class="stepindicator">
 				<li [class.active]="step>1">Persoonlijke gegevens</li>
 				<li [class.active]="step>2">Adresgegevens</li>
-				<li [class.active]="step>3">Betaling contributie</li>
+				<li [class.active]="step>3">Registratie afronden</li>
 			</ul>
 		</div>
 	</div>
@@ -14,6 +14,11 @@
 <div class="container" *ngIf="step==1" >
 	<div class="row" >
 		<div class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3" >
+			<span *ngIf="viaLink" >
+				<h3>Hallo {{member.givenName}} {{member.lastName}}!</h3>
+				<strong>Fijn dat je lid wilt worden. Volg deze drie simpele stappen om je registratie af te ronden.</strong>
+				<br/>
+			</span>
 			<h3>Persoonlijke gegevens</h3>
 			<form (ngSubmit)="saveStep1(formStep1, $event)" #formStep1="ngForm">
 				<div class="form-group row" [ngClass]="{'has-danger': givenName?.touched && !givenName?.valid}">
