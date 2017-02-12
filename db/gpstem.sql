@@ -301,13 +301,19 @@ CREATE UNIQUE INDEX email_verifications_idx_email_proof ON members.email_verific
 CREATE TABLE members.payments(
 	id serial NOT NULL,
 	account_id integer NOT NULL,
+	total_amount money NOT NULL,
+	fee_amount money NOT NULL DEFAULT 12.00,
+	donation_amount money NOT NULL DEFAULT 0.00,
+	purchase_amount money NOT NULL DEFAULT 0.00,
+	purchase_options varchar(200)[] NOT NULL,
 	mollie_id varchar(20) NOT NULL,
 	mollie_status members.enum_mollie_status NOT NULL,
 	mollie_created timestamp NOT NULL,
 	mollie_paid timestamp,
 	created timestamp NOT NULL DEFAULT now(),
 	CONSTRAINT payments_pk PRIMARY KEY (id),
-	CONSTRAINT payments_uq_mollie_id UNIQUE (mollie_id)
+	CONSTRAINT payments_uq_mollie_id UNIQUE (mollie_id),
+	CONSTRAINT payment_check_fee_amount CHECK (fee_amount = 12.00::money)
 
 );
 -- ddl-end --
@@ -379,16 +385,16 @@ REFERENCES i8n.languages (id) MATCH FULL
 ON DELETE RESTRICT ON UPDATE RESTRICT;
 -- ddl-end --
 
--- object: payments_fk_account | type: CONSTRAINT --
--- ALTER TABLE members.payments DROP CONSTRAINT IF EXISTS payments_fk_account CASCADE;
-ALTER TABLE members.payments ADD CONSTRAINT payments_fk_account FOREIGN KEY (account_id)
+-- object: email_verifications_fk_account | type: CONSTRAINT --
+-- ALTER TABLE members.email_verifications DROP CONSTRAINT IF EXISTS email_verifications_fk_account CASCADE;
+ALTER TABLE members.email_verifications ADD CONSTRAINT email_verifications_fk_account FOREIGN KEY (account_id)
 REFERENCES members.accounts (id) MATCH FULL
 ON DELETE NO ACTION ON UPDATE NO ACTION;
 -- ddl-end --
 
--- object: email_verifications_fk_account | type: CONSTRAINT --
--- ALTER TABLE members.email_verifications DROP CONSTRAINT IF EXISTS email_verifications_fk_account CASCADE;
-ALTER TABLE members.email_verifications ADD CONSTRAINT email_verifications_fk_account FOREIGN KEY (account_id)
+-- object: payments_fk_account | type: CONSTRAINT --
+-- ALTER TABLE members.payments DROP CONSTRAINT IF EXISTS payments_fk_account CASCADE;
+ALTER TABLE members.payments ADD CONSTRAINT payments_fk_account FOREIGN KEY (account_id)
 REFERENCES members.accounts (id) MATCH FULL
 ON DELETE NO ACTION ON UPDATE NO ACTION;
 -- ddl-end --

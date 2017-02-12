@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0-alpha1" author="Geert-Johan Riemer" last-position="20,103" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0-alpha1" author="Geert-Johan Riemer" last-position="0,19" last-zoom="1"
 	 default-schema="public" default-owner="postgres">
 <role name="rutte"
       superuser="true"
@@ -31,7 +31,7 @@ $$ VOLATILE LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION fee_paid(members.accounts) RETURNS boolean AS $$
 	SELECT coalesce(date_part('year', age($1.fee_last_payment_date)) < 1, false)
 $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
-	<position x="760" y="444"/>
+	<position x="760" y="440"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -169,7 +169,7 @@ END;]]></definition>
 <table name="sessions">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="1480" y="384"/>
+	<position x="1480" y="380"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -190,7 +190,7 @@ END;]]></definition>
 <table name="entitlement_proofs">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="1480" y="504"/>
+	<position x="1480" y="500"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -329,7 +329,7 @@ END;
 <table name="email_verifications">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="1480" y="780"/>
+	<position x="1480" y="880"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -367,12 +367,27 @@ END;
 <table name="payments">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="1480" y="600"/>
+	<position x="1480" y="620"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
 	<column name="account_id" not-null="true">
 		<type name="integer" length="0"/>
+	</column>
+	<column name="total_amount" not-null="true">
+		<type name="money" length="0"/>
+	</column>
+	<column name="fee_amount" not-null="true" default-value="12.00">
+		<type name="money" length="0"/>
+	</column>
+	<column name="donation_amount" not-null="true" default-value="0.00">
+		<type name="money" length="0"/>
+	</column>
+	<column name="purchase_amount" not-null="true" default-value="0.00">
+		<type name="money" length="0"/>
+	</column>
+	<column name="purchase_options" not-null="true">
+		<type name="varchar" length="200" dimension="1"/>
 	</column>
 	<column name="mollie_id" not-null="true">
 		<type name="varchar" length="20"/>
@@ -394,6 +409,9 @@ END;
 	</constraint>
 	<constraint name="payments_uq_mollie_id" type="uq-constr" table="members.payments">
 		<columns names="mollie_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="payment_check_fee_amount" type="ck-constr" table="members.payments">
+			<expression><![CDATA[fee_amount = 12.00::money]]></expression>
 	</constraint>
 </table>
 
@@ -455,14 +473,14 @@ END;]]></definition>
 	<columns names="id" ref-type="dst-columns"/>
 </constraint>
 
-<constraint name="payments_fk_account" type="fk-constr" comparison-type="MATCH FULL"
-	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="members.accounts" table="members.payments">
+<constraint name="email_verifications_fk_account" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="members.accounts" table="members.email_verifications">
 	<columns names="account_id" ref-type="src-columns"/>
 	<columns names="id" ref-type="dst-columns"/>
 </constraint>
 
-<constraint name="email_verifications_fk_account" type="fk-constr" comparison-type="MATCH FULL"
-	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="members.accounts" table="members.email_verifications">
+<constraint name="payments_fk_account" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="members.accounts" table="members.payments">
 	<columns names="account_id" ref-type="src-columns"/>
 	<columns names="id" ref-type="dst-columns"/>
 </constraint>
