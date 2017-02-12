@@ -20,6 +20,7 @@ class MemberRegistration {
 	lastName: string;
 	birthdate: Date;
 	email: string;
+	phonenumber: string;
 
 	// step1 api call results
 	id: number = null;
@@ -34,6 +35,9 @@ class MemberRegistration {
 	city: string;
 	province: string;
 	countryCode: string = null; // selected in pre-step2 with buttons. Must be set to null by default to diff between !'NL' and not chosen yet.
+
+	kalenderjaar: boolean = false;
+	stemrecht: boolean = false;
 }
 
 class PostalcodeHousenumber {
@@ -72,6 +76,15 @@ class ResponseStep3 {
 	@JsonMember({ elements: String }) errors: string[];
 }
 
+@JsonObject()
+class ResponseCheckPayment {
+	@JsonMember() paid: boolean;
+
+	// errors array, the request was ok when length==0
+	// contains non-human-friendly errorcodes
+	@JsonMember({ elements: String }) errors: string[];
+}
+
 @Component({
 	styleUrls: [`app/register/register.component.css`],
 	templateUrl: `app/register/register.component.html`,
@@ -92,6 +105,10 @@ export class RegisterComponent {
 
 	// viaLink
 	viaLink: boolean = false;
+
+	// checkPaymentToken is set when returning from a payment.
+	checkPaymentToken: string = null;
+	checkPaymentSuccess: boolean = null;
 
 	// member details during registration
 	@SessionStorage('register.member')
@@ -145,6 +162,13 @@ export class RegisterComponent {
 		this.route.params.forEach((params: Params) => {
 			if (!params['step']) {
 				this.step = 1;
+				return;
+			}
+
+			if (params['step'] == "check-payment") {
+				this.step = 3;
+				this.checkPaymentToken = this.parseQueryString()["token"];
+				this.checkPayment();
 				return;
 			}
 
@@ -264,10 +288,58 @@ export class RegisterComponent {
 		this.http.post(this.config.apiURL + `/api/register/step3`, this.member).toPromise().then((res: Response) => {
 			let responseStep3 = TypedJSON.parse(res.text(), ResponseStep3);
 			if (responseStep3.errors.length > 0) {
-				this.handleSaveErrorsStep2(responseStep3.errors);
+				this.handleSaveErrorsStep3(responseStep3.errors);
+				return;
 			}
-			console.log(responseStep3.payment_url);
+			this.member = this.member; // trigger WebStorage decorator save
+			window.location.assign(responseStep3.payment_url);
 		}).catch((error: any) => alert(error));
+	}
+
+	private handleSaveErrorsStep3(errors: string[]) {
+		errors.forEach((error: any) => {
+			switch (error) {
+				case 'pgerr:not_null_violation:account_id':
+					this.member = null;
+					alert('De registratie is niet succesvol verlopen. Probeer het a.u.b. opnieuw.');
+					this.router.navigate(['lid-worden', 1]);
+					break;
+				default:
+					alert('unhandled error: ' + error); // TODO: dialog
+					break;
+			}
+		});
+		this.errors = errors;
+		return;
+	}
+
+	private checkPayment() {
+		this.http.get(this.config.apiURL + `/api/register/check-payment?token=` + this.checkPaymentToken).toPromise().then((res: Response) => {
+			let responseCheckPayment = TypedJSON.parse(res.text(), ResponseCheckPayment);
+			if (responseCheckPayment.errors.length > 0) {
+				this.handleErrorsCheckPayment(responseCheckPayment.errors);
+				return;
+			}
+			this.checkPaymentSuccess = responseCheckPayment.paid;
+			if (this.checkPaymentSuccess) {
+				this.member = null;
+			}
+		}).catch((error: any) => alert(error));
+	}
+
+	private handleErrorsCheckPayment(errors: string[]) {
+		errors.forEach((error: any) => {
+			switch (error) {
+				case 'rutte:invalid_payment_token':
+					alert('Ongeldige URL');
+					this.router.navigate(['lid-worden', 1]);
+					break;
+				default:
+					alert('unhandled error: ' + error); // TODO: dialog
+					break;
+			}
+		});
+		this.errors = errors;
 	}
 
 	private parseQueryString() {

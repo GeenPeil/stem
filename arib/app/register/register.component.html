@@ -43,7 +43,7 @@
 						<div class="input-group">
 							<input type="text" class="form-control" id="birthdate"
 								[(ngModel)]="member.birthdate" #birthdate="ngModel" name="birthdate"
-								required [attr.readonly]="member.step>1 || saveInProgress" placeholder="jaar-maand-dag"
+								required [attr.readonly]="member.step>1 || saveInProgress" placeholder="dag-maand-jaar"
 								ngbDatepicker #d="ngbDatepicker" [minDate]="{year:1940,month:01,day:01}" [maxDate]="{year:2004,month:12,day:31}">
 							<div class="input-group-addon" (click)="d.toggle()" >
 								<span class="icon-calendar" style="width: 1.2rem; height: 1rem; cursor: pointer;" ></span>
@@ -52,13 +52,19 @@
 						<div *ngIf="errors.includes('pgerr:check_violation:accounts_check_age_over_14')" class="form-control-feedback">Een lid moet 14 jaar of ouder zijn.</div>
 					</div>
 				</div>
-				<div class="form-group row" [ngClass]="{'has-danger': (email?.touched && !email?.valid) || errors.includes('rutte:invalid_email_address') || errors.includes('pgerr:accounts_uq_email')}">
+				<div class="form-group row" [ngClass]="{'has-danger': (email?.touched && !email?.valid) || errors.includes('rutte:invalid_email_address')}">
 					<label for="email" class="col-3 col-form-label">Email</label>
 					<div class="col-9">
 						<input type="text" class="form-control" id="email"
 							[(ngModel)]="member.email" #email="ngModel" name="email" required [attr.readonly]="member.step>1 || saveInProgress">
 						<div *ngIf="errors.includes('rutte:invalid_email_address')" class="form-control-feedback">Het ingevulde email adres is ongeldig.</div>
-						<div *ngIf="errors.includes('pgerr:accounts_uq_email')" class="form-control-feedback">Het ingevulde email adres is al in gebruik.</div>
+					</div>
+				</div>
+				<div class="form-group row" [ngClass]="{'has-danger': (phonenumber?.touched && !phonenumber?.valid)}">
+					<label for="phonenumber" class="col-3 col-form-label">Telefoonnummer</label>
+					<div class="col-9">
+						<input type="text" class="form-control" id="phonenumber"
+							[(ngModel)]="member.phonenumber" #phonenumber="ngModel" name="phonenumber" required [attr.readonly]="member.step>1 || saveInProgress">
 					</div>
 				</div>
 				<div class="form-group row">
@@ -83,7 +89,7 @@
 					<div class="col-6" ><button type="button" class="btn btn-lg btn-secondary" (click)="member.countryCode=''" >Buiten Nederland</button></div>
 				</div>
 			</div>
-			
+
 			<form (ngSubmit)="saveStep2(formStep2, $event)" #formStep2="ngForm" *ngIf="member.countryCode!=null">
 				<div class="form-group row" [ngClass]="{'has-danger': (postalcode?.touched && !postalcode?.valid) || errors.includes('rutte:PostcodeNl_Service_PostcodeAddress_AddressNotFoundException')}">
 					<label for="postalcode" class="col-3 col-form-label">Postcode</label>
@@ -152,22 +158,22 @@
 	</div>
 </div>
 
-
 <div class="container" *ngIf="step==3" >
-	<div class="row" >
+	<div class="row" *ngIf="checkPaymentToken==null || checkPaymentSuccess===false">
 		<div class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3" >
+			<h4 *ngIf="checkPaymentToken!=null && checkPaymentSuccess===false">Er was een probleem tijdens de betaling. Probeer het a.u.b. opnieuw</h4>
 			<form (ngSubmit)="saveStep3(formStep3, $event)" #formStep3="ngForm">
 				<div class="form-check row">
 					<label class="form-check-label col-12">
 						<input type="checkbox" class="form-check-input"
-						ngModel #kalenderjaar="ngModel" name="kalenderjaar" >
+						ngModel="member.kalenderjaar" #kalenderjaar="ngModel" name="kalenderjaar" >
 						Ik word lid van GeenPeil voor 12 euro voor kalenderjaar 2017.
 					</label>
 				</div>
 				<div class="form-check row">
 					<label class="form-check-label col-12">
 						<input type="checkbox" class="form-check-input"
-						ngModel #stemrecht="ngModel" name="stemrecht" >
+						ngModel="member.stemrecht" #stemrecht="ngModel" name="stemrecht" >
 						Ik begrijp dat ik alleen stemrecht krijg binnen GeenPeil als ik een Nederlandse kiesgerechtigde ben.
 					</label>
 				</div>
@@ -176,13 +182,13 @@
 						<img src="/static/payment-logos/ideal.png" alt="Betalen via iDEAL" />
 					</div>
 					<div class="col-3 centered" >
+						<img src="/static/payment-logos/creditcard.png" alt="Betalen met CreditCard" />
+					</div>
+					<div class="col-3 centered" >
 						<img src="/static/payment-logos/paypal.png" alt="Betalen via PayPal" />
 					</div>
 					<div class="col-3 centered" >
 						<img src="/static/payment-logos/bitcoin.png" alt="Betalen met Bitcoin" />
-					</div>
-					<div class="col-3 centered" >
-						<img src="/static/payment-logos/creditcard.png" alt="Betalen met CreditCard" />
 					</div>
 				</div>
 				<div class="form-group row">
@@ -193,5 +199,8 @@
 				</div>
 			</form>
 		</div>
+	</div>
+	<div class="row" *ngIf="checkPaymentToken!=null && checkPaymentSuccess===true">
+		<h2>Bedankt!</h2>
 	</div>
 </div>

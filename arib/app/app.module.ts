@@ -3,6 +3,8 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Ng2Webstorage } from 'ng2-webstorage';
+import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDateDMYParserFormatter } from './ngb/ngb-date-dmy-parser-formatter';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AuthModule } from './auth/auth.module';
@@ -27,7 +29,10 @@ import './rxjs-operators';
 		ProfileModule,
 		AppRoutingModule
 	],
-	providers: [],
+	providers: [
+		// provide dutch (day-month-year) date formatting/parsing class
+		{ provide: NgbDateParserFormatter, useClass: NgbDateDMYParserFormatter }
+	],
 	declarations: [
 		AppComponent,
 		PageNotFoundComponent

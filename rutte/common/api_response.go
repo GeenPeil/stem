@@ -29,6 +29,9 @@ func (cr *APIResponse) CheckPgErr(err error) bool {
 		case `check_violation`:
 			cr.Errors = append(cr.Errors, `pgerr:check_violation:`+perr.Constraint)
 			return true
+		case `not_null_violation`:
+			cr.Errors = append(cr.Errors, `pgerr:not_null_violation:`+perr.Column)
+			return true
 		case `datetime_field_overflow`:
 			cr.Errors = append(cr.Errors, `pgerr:datetime_field_overflow`)
 			return true

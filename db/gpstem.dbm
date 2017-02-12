@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0-alpha1" author="Geert-Johan Riemer" last-position="0,19" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0-alpha1" author="Geert-Johan Riemer" last-position="0,2" last-zoom="0.7"
 	 default-schema="public" default-owner="postgres">
 <role name="rutte"
       superuser="true"
@@ -38,6 +38,9 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<column name="email" not-null="true">
 		<type name="varchar" length="200"/>
 	</column>
+	<column name="loginname">
+		<type name="varchar" length="200"/>
+	</column>
 	<column name="nickname">
 		<type name="varchar" length="30"/>
 		<comment><![CDATA[When NULL, user has never chosen a nickname.]]></comment>
@@ -53,9 +56,15 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 		<type name="varchar" length="20"/>
 		<comment><![CDATA[Initials, no separation signs]]></comment>
 	</column>
+	<column name="last_name_prefix">
+		<type name="varchar" length="30"/>
+	</column>
 	<column name="last_name" not-null="true">
 		<type name="varchar" length="200"/>
 		<comment><![CDATA[Includes prefix]]></comment>
+	</column>
+	<column name="last_name_full">
+		<type name="varchar" length="230"/>
 	</column>
 	<column name="birthdate" not-null="true">
 		<type name="date" length="1"/>
@@ -109,8 +118,8 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<constraint name="accounts_pk" type="pk-constr" table="members.accounts">
 		<columns names="id" ref-type="src-columns"/>
 	</constraint>
-	<constraint name="accounts_uq_email" type="uq-constr" table="members.accounts">
-		<columns names="email" ref-type="src-columns"/>
+	<constraint name="accounts_uq_loginname" type="uq-constr" table="members.accounts">
+		<columns names="loginname" ref-type="src-columns"/>
 	</constraint>
 	<constraint name="accounts_uq_nickname" type="uq-constr" table="members.accounts">
 		<columns names="nickname" ref-type="src-columns"/>
@@ -329,7 +338,7 @@ END;
 <table name="email_verifications">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="1480" y="880"/>
+	<position x="1480" y="920"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -367,6 +376,9 @@ END;
 <table name="payments">
 	<schema name="members"/>
 	<role name="postgres"/>
+	<appended-sql><![CDATA[CREATE OR REPLACE FUNCTION total_amount(members.payments) RETURNS money AS $$
+	SELECT $1.fee_amount + $1.donation_amount + $1.purchase_amount
+$$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<position x="1480" y="620"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
@@ -374,8 +386,8 @@ END;
 	<column name="account_id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="total_amount" not-null="true">
-		<type name="money" length="0"/>
+	<column name="token" not-null="true">
+		<type name="varchar" length="80"/>
 	</column>
 	<column name="fee_amount" not-null="true" default-value="12.00">
 		<type name="money" length="0"/>
@@ -386,7 +398,7 @@ END;
 	<column name="purchase_amount" not-null="true" default-value="0.00">
 		<type name="money" length="0"/>
 	</column>
-	<column name="purchase_options" not-null="true">
+	<column name="purchase_options" not-null="true" default-value="'{}'">
 		<type name="varchar" length="200" dimension="1"/>
 	</column>
 	<column name="mollie_id" not-null="true">
@@ -412,6 +424,9 @@ END;
 	</constraint>
 	<constraint name="payment_check_fee_amount" type="ck-constr" table="members.payments">
 			<expression><![CDATA[fee_amount = 12.00::money]]></expression>
+	</constraint>
+	<constraint name="payments_uq_token" type="uq-constr" table="members.payments">
+		<columns names="token" ref-type="src-columns"/>
 	</constraint>
 </table>
 
@@ -442,6 +457,26 @@ END;]]></definition>
 	 table="members.payments">
 		<function signature="members.payments_fn_update_account_payment_date()"/>
 </trigger>
+
+<function name="accounts_fn_set_last_name_full"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="members"/>
+	<role name="postgres"/>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="trigger" length="0"/>
+	</return-type>
+	<definition><![CDATA[BEGIN
+	NEW.last_name_full = COALESCE(NEW.last_name_prefix, '') + NEW.last_name;
+	RETURN NEW;
+END;]]></definition>
+</function>
 
 <constraint name="accounts_fk_country" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="i8n.countries" table="members.accounts">

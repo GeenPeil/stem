@@ -43,6 +43,7 @@ func (a *API) AttachChiRouter(r chi.Router) {
 	r.Post("/register/step1", a.registerStep1())
 	r.Post("/register/step2", a.registerStep2())
 	r.Post("/register/step3", a.registerStep3())
+	r.Get("/register/check-payment", a.mollieCheckPayment())
 	r.Post("/register/mollie-webhook", a.mollieWebhook())
 	r.Post("/login", a.login())
 	r.Post("/logout", a.logout())

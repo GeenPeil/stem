@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -27,12 +28,14 @@ func (a *API) registerStep1() http.HandlerFunc {
 			given_name,
 			last_name,
 			birthdate,
+			phonenumber,
 			registration_token
 		) VALUES (
 			:email,
 			:given_name,
 			:last_name,
 			CAST(:birthdate AS date),
+			:phonenumber,
 			:registration_token
 		) RETURNING id`)
 	if err != nil {
@@ -40,10 +43,11 @@ func (a *API) registerStep1() http.HandlerFunc {
 	}
 
 	type InMember struct {
-		Email     string      `json:"email"`
-		GivenName string      `json:"givenName"`
-		LastName  string      `json:"lastName"`
-		Birthdate common.Date `json:"birthdate"`
+		Email       string      `json:"email"`
+		GivenName   string      `json:"givenName"`
+		LastName    string      `json:"lastName"`
+		Phonenumber string      `json:"phonenumber"`
+		Birthdate   common.Date `json:"birthdate"`
 	}
 
 	type Member struct {
@@ -217,11 +221,13 @@ func (a *API) registerStep3() http.HandlerFunc {
 	stmtCreatePayment, err := a.db.PrepareNamed(`
 		INSERT INTO members.payments (
 			account_id,
+			token,
 			mollie_id,
 			mollie_status,
 			mollie_created
 		) VALUES (
 			(SELECT id FROM members.accounts WHERE id = :id AND registration_token = :registration_token),
+			:token,
 			:mollie_id,
 			CAST(:mollie_status AS members.enum_mollie_status),
 			:mollie_created
@@ -237,6 +243,7 @@ func (a *API) registerStep3() http.HandlerFunc {
 
 	type Payment struct {
 		InRequest
+		Token         string
 		MollieID      string
 		MollieStatus  string
 		MollieCreated *time.Time
@@ -264,10 +271,11 @@ func (a *API) registerStep3() http.HandlerFunc {
 			APIResponse: common.NewAPIResponse(),
 		}
 		{
+			var paymentToken = token.RandomToken(80)
 			molliePayment, _, err := a.molliePaymentService.Create(&mollieServices.PaymentRequest{
 				Amount:      decimal.New(12, 0),
 				Description: `Lidmaatschap GeenPeil 2017`,
-				RedirectUrl: a.selfHTTPAddress + `/api/register/mollie-redirect`,
+				RedirectUrl: a.selfHTTPAddress + `/lid-worden/check-payment?token=` + paymentToken,
 				WebhookUrl:  a.selfHTTPAddress + `/api/register/mollie-webhook`,
 				Locale:      "nl_NL",
 				// Metadata:    map[string]string{},
@@ -278,6 +286,7 @@ func (a *API) registerStep3() http.HandlerFunc {
 
 			payment := Payment{
 				InRequest:     in,
+				Token:         paymentToken,
 				MollieID:      molliePayment.ID,
 				MollieStatus:  molliePayment.Status,
 				MollieCreated: molliePayment.CreatedDatetime,
@@ -304,6 +313,53 @@ func (a *API) registerStep3() http.HandlerFunc {
 				return
 			}
 			out.PaymentURL = molliePayment.Links.PaymentUrl
+		}
+	Done:
+		render.JSON(w, r, &out)
+	}
+}
+
+// paymentStatus
+func (a *API) mollieCheckPayment() http.HandlerFunc {
+	log := a.log.WithField("handler", "register/check-payment")
+	log.Infoln("setup")
+
+	stmtSelectMollieID, err := a.db.Preparex(`SELECT mollie_id FROM members.payments WHERE token = $1`)
+	if err != nil {
+		log.WithError(err).Fatalln("error preparing statement")
+	}
+
+	type OutPaymentStatus struct {
+		common.APIResponse
+		Paid bool `json:"paid"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		log := log.WithField("requestID", middleware.GetReqID(r.Context()))
+
+		out := OutPaymentStatus{
+			APIResponse: common.NewAPIResponse(),
+		}
+		{
+			token := r.FormValue("token")
+			var mollieID string
+			err := stmtSelectMollieID.QueryRowx(token).Scan(&mollieID)
+			if err != nil {
+				if err == sql.ErrNoRows {
+					out.AddErrorCode(`rutte:invalid_payment_token`)
+					goto Done
+				}
+				log.WithError(err).Errorln("error getting mollieID by token")
+			}
+			molliePayment, _, err := a.molliePaymentService.Fetch(mollieID)
+			if err != nil {
+				log.WithError(err).Errorln(`error getting mollie payment`)
+				http.Error(w, "server error", http.StatusInternalServerError)
+				return
+			}
+			if molliePayment.PaidDatetime != nil {
+				out.Paid = true
+			}
 		}
 	Done:
 		render.JSON(w, r, &out)
@@ -338,6 +394,8 @@ func (a *API) mollieWebhook() http.HandlerFunc {
 		molliePayment, _, err := a.molliePaymentService.Fetch(mollieID)
 		if err != nil {
 			log.WithError(err).Errorln(`error getting mollie payment`)
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
 		}
 
 		payment := Payment{

@@ -47,11 +47,14 @@ SET search_path TO pg_catalog,public,members,i8n;
 CREATE TABLE members.accounts(
 	id serial NOT NULL,
 	email varchar(200) NOT NULL,
+	loginname varchar(200),
 	nickname varchar(30),
 	given_name varchar(100) NOT NULL,
 	first_names varchar(200) NOT NULL DEFAULT '',
 	initials varchar(20) NOT NULL DEFAULT '',
+	last_name_prefix varchar(30),
 	last_name varchar(200) NOT NULL,
+	last_name_full varchar(230),
 	birthdate date NOT NULL,
 	phonenumber varchar(15) NOT NULL DEFAULT '',
 	postalcode varchar(10) NOT NULL DEFAULT '',
@@ -69,7 +72,7 @@ CREATE TABLE members.accounts(
 	registration_token varchar(200) NOT NULL,
 	registration_date date NOT NULL DEFAULT now(),
 	CONSTRAINT accounts_pk PRIMARY KEY (id),
-	CONSTRAINT accounts_uq_email UNIQUE (email),
+	CONSTRAINT accounts_uq_loginname UNIQUE (loginname),
 	CONSTRAINT accounts_uq_nickname UNIQUE (nickname),
 	CONSTRAINT accounts_check_nickname_length CHECK (char_length(nickname) > 3),
 	CONSTRAINT accounts_check_age_over_14 CHECK (date_part('year', age(birthdate)) >= 14)
@@ -301,11 +304,11 @@ CREATE UNIQUE INDEX email_verifications_idx_email_proof ON members.email_verific
 CREATE TABLE members.payments(
 	id serial NOT NULL,
 	account_id integer NOT NULL,
-	total_amount money NOT NULL,
+	token varchar(80) NOT NULL,
 	fee_amount money NOT NULL DEFAULT 12.00,
 	donation_amount money NOT NULL DEFAULT 0.00,
 	purchase_amount money NOT NULL DEFAULT 0.00,
-	purchase_options varchar(200)[] NOT NULL,
+	purchase_options varchar(200)[] NOT NULL DEFAULT '{}',
 	mollie_id varchar(20) NOT NULL,
 	mollie_status members.enum_mollie_status NOT NULL,
 	mollie_created timestamp NOT NULL,
@@ -313,11 +316,18 @@ CREATE TABLE members.payments(
 	created timestamp NOT NULL DEFAULT now(),
 	CONSTRAINT payments_pk PRIMARY KEY (id),
 	CONSTRAINT payments_uq_mollie_id UNIQUE (mollie_id),
-	CONSTRAINT payment_check_fee_amount CHECK (fee_amount = 12.00::money)
+	CONSTRAINT payment_check_fee_amount CHECK (fee_amount = 12.00::money),
+	CONSTRAINT payments_uq_token UNIQUE (token)
 
 );
 -- ddl-end --
 ALTER TABLE members.payments OWNER TO postgres;
+-- ddl-end --
+
+-- Appended SQL commands --
+CREATE OR REPLACE FUNCTION total_amount(members.payments) RETURNS money AS $$
+	SELECT $1.fee_amount + $1.donation_amount + $1.purchase_amount
+$$ VOLATILE LANGUAGE SQL;
 -- ddl-end --
 
 -- object: members.payments_fn_update_account_payment_date | type: FUNCTION --
@@ -348,6 +358,25 @@ CREATE TRIGGER payments_tr_update_account_payment_date
 	ON members.payments
 	FOR EACH ROW
 	EXECUTE PROCEDURE members.payments_fn_update_account_payment_date();
+-- ddl-end --
+
+-- object: members.accounts_fn_set_last_name_full | type: FUNCTION --
+-- DROP FUNCTION IF EXISTS members.accounts_fn_set_last_name_full() CASCADE;
+CREATE FUNCTION members.accounts_fn_set_last_name_full ()
+	RETURNS trigger
+	LANGUAGE plpgsql
+	VOLATILE 
+	CALLED ON NULL INPUT
+	SECURITY INVOKER
+	COST 1
+	AS $$
+BEGIN
+	NEW.last_name_full = COALESCE(NEW.last_name_prefix, '') + NEW.last_name;
+	RETURN NEW;
+END;
+$$;
+-- ddl-end --
+ALTER FUNCTION members.accounts_fn_set_last_name_full() OWNER TO postgres;
 -- ddl-end --
 
 -- object: accounts_fk_country | type: CONSTRAINT --
