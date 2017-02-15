@@ -28,13 +28,20 @@ func New(log *logrus.Entry, db *sqlx.DB) *API {
 
 // AttachChiRouter attaches API routes to the provided chi router.
 func (a *API) AttachChiRouter(r chi.Router) {
-	a.log.Infoln("attach chi router api")
+	a.log.Infoln("attach chi router")
+
 	r.Use(middleware.NoCache)
 	r.Get("/", a.getRoot)
 	r.Post("/login", a.login())
+
 	r.Route("/private", func(r chi.Router) {
 		r.Use(a.newAccountAuthMiddleware())
 		r.Get("/profile", a.getProfileOverview())
+
+		r.Route("/entitlement", func(r chi.Router) {
+			r.Get("/", a.getEntitlementsOverview())
+			r.Post("/", a.createEntitlement())
+		})
 	})
 }
 

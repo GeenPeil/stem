@@ -7,7 +7,7 @@ import (
 	"github.com/pressly/chi/render"
 )
 
-// getProfile retrieves the profile overview for currently logged in user
+// getProfileOverview retrieves the profile overview for currently logged in user
 func (a *API) getProfileOverview() http.HandlerFunc {
 	log := a.log.WithField("handler", "profile/overview")
 	log.Infoln("setup")
