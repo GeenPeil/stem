@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "commonjs",
+    "module": "es2015",
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -12,36 +12,34 @@
     "importHelpers": true,
     "strictNullChecks": false,
     "lib": [
-      "dom",
-      "es6"
+      "es2015",
+      "dom"
     ],
     "typeRoots": [
       "node_modules/@types"
     ],
     "types": [
       "hammerjs",
-      "jasmine",
-      "node",
-      "source-map",
-      "uglify-js",
-      "webpack"
+      "node"
     ]
   },
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "src/**/*.spec.ts",
+    "src/**/*.e2e.ts"
   ],
   "awesomeTypescriptLoaderOptions": {
     "forkChecker": true,
     "useWebpackText": true
   },
-	"formatCodeOptions": {
-		"convertTabsToSpaces": false
-	},
+  "angularCompilerOptions": {
+    "genDir": "./compiled",
+    "skipMetadataEmit": true
+  },
   "compileOnSave": false,
   "buildOnSave": false,
   "atom": {
-    "formatOnSave": true,
     "rewriteTsconfig": false
   }
 }

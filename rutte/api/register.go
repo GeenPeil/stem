@@ -251,7 +251,7 @@ func (a *API) registerStep3() http.HandlerFunc {
 
 	type OutResponse struct {
 		common.APIResponse
-		PaymentURL string `json:"payment_url"`
+		PaymentURL string `json:"paymentURL"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
