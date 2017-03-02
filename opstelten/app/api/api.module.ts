@@ -7,11 +7,11 @@ import { Api } from './api.service';
 
 
 @NgModule({
-    imports: [
-        HttpModule,
-        CommonModule
-    ],
-    providers: [Api],
-    declarations: []
+	imports: [
+		HttpModule,
+		CommonModule
+	],
+	providers: [Api],
+	declarations: []
 })
 export class ApiModule { }

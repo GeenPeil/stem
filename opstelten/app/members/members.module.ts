@@ -13,20 +13,20 @@ import { MemberListComponent } from './member-list.component';
 import { MemberComponent } from './member.component';
 
 @NgModule({
-    imports: [
-        BrowserModule,
-        FormsModule,
-        NgbModule,
-        CommonModule,
-        ApiModule,
-        MembersRoutingModule
-    ],
-    providers: [
-        MemberService
-    ],
-    declarations: [
-        MemberListComponent,
-        MemberComponent
-    ]
+	imports: [
+		BrowserModule,
+		FormsModule,
+		NgbModule,
+		CommonModule,
+		ApiModule,
+		MembersRoutingModule
+	],
+	providers: [
+		MemberService
+	],
+	declarations: [
+		MemberListComponent,
+		MemberComponent
+	]
 })
 export class MembersModule { }

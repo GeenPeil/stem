@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0-alpha1" author="Geert-Johan Riemer" last-position="0,0" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0-alpha1" author="Geert-Johan Riemer" last-position="0,2" last-zoom="0.7"
 	 default-schema="public" default-owner="postgres">
 <role name="rutte"
       superuser="true"
@@ -31,31 +31,40 @@ $$ VOLATILE LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION fee_paid(members.accounts) RETURNS boolean AS $$
 	SELECT coalesce(date_part('year', age($1.fee_last_payment_date)) < 1, false)
 $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
-	<position x="120" y="120"/>
+	<position x="760" y="440"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
 	<column name="email" not-null="true">
 		<type name="varchar" length="200"/>
 	</column>
+	<column name="loginname">
+		<type name="varchar" length="200"/>
+	</column>
 	<column name="nickname">
 		<type name="varchar" length="30"/>
 		<comment><![CDATA[When NULL, user has never chosen a nickname.]]></comment>
 	</column>
-	<column name="given_name" not-null="true" default-value="''">
+	<column name="given_name" not-null="true">
 		<type name="varchar" length="100"/>
 	</column>
 	<column name="first_names" not-null="true" default-value="''">
 		<type name="varchar" length="200"/>
 		<comment><![CDATA[Separated by space]]></comment>
 	</column>
-	<column name="initials" not-null="true">
+	<column name="initials" not-null="true" default-value="''">
 		<type name="varchar" length="20"/>
 		<comment><![CDATA[Initials, no separation signs]]></comment>
+	</column>
+	<column name="last_name_prefix">
+		<type name="varchar" length="30"/>
 	</column>
 	<column name="last_name" not-null="true">
 		<type name="varchar" length="200"/>
 		<comment><![CDATA[Includes prefix]]></comment>
+	</column>
+	<column name="last_name_full">
+		<type name="varchar" length="230"/>
 	</column>
 	<column name="birthdate" not-null="true">
 		<type name="date" length="1"/>
@@ -81,15 +90,15 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<column name="province" not-null="true" default-value="''">
 		<type name="varchar" length="100"/>
 	</column>
-	<column name="country" not-null="true" default-value="''">
-		<type name="varchar" length="100"/>
+	<column name="country_id">
+		<type name="integer" length="100"/>
 	</column>
 	<column name="fee_last_payment_date">
 		<type name="date" length="1"/>
 		<comment><![CDATA[When set to NULL, member has never paid.]]></comment>
 	</column>
 	<column name="verified_email" not-null="true" default-value="false">
-		<type name="boolean" length="1"/>
+		<type name="boolean" length="0"/>
 	</column>
 	<column name="verified_identity" not-null="true" default-value="false">
 		<type name="boolean" length="1"/>
@@ -100,11 +109,17 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 	<column name="textsearch_vector">
 		<type name="tsvector" length="0"/>
 	</column>
+	<column name="registration_token" not-null="true">
+		<type name="varchar" length="200"/>
+	</column>
+	<column name="registration_date" not-null="true" default-value="now()">
+		<type name="date" length="0"/>
+	</column>
 	<constraint name="accounts_pk" type="pk-constr" table="members.accounts">
 		<columns names="id" ref-type="src-columns"/>
 	</constraint>
-	<constraint name="accounts_uq_email" type="uq-constr" table="members.accounts">
-		<columns names="email" ref-type="src-columns"/>
+	<constraint name="accounts_uq_loginname" type="uq-constr" table="members.accounts">
+		<columns names="loginname" ref-type="src-columns"/>
 	</constraint>
 	<constraint name="accounts_uq_nickname" type="uq-constr" table="members.accounts">
 		<columns names="nickname" ref-type="src-columns"/>
@@ -116,10 +131,6 @@ $$ VOLATILE LANGUAGE SQL;]]></appended-sql>
 			<expression><![CDATA[date_part('year', age(birthdate)) >= 14]]></expression>
 		<comment><![CDATA[One can only become a member at age 14 or older.]]></comment>
 	</constraint>
-	<initial-data>
-<![CDATA[id•email•nickname•given_name•first_names•initials•last_name•birthdate•phonenumber•postalcode•housenumber•housenumber_suffix•streetname•city•province•country•fee_last_payment_date•verified_email•verified_identity•verified_voting_entitlement⸣
-1•geertjohan@geertjohan.net•GeertJohan•Geert-Johan•Geert Johan•GJ•Riemer•01-01-1990•31612345678•1234AB•10•A•Somestreet•Peilstad•Noord-Holland•Nederland•2017-01-01•f•f•f]]>
-	</initial-data>
 </table>
 
 <function name="accounts_fn_lock_identity"
@@ -167,7 +178,7 @@ END;]]></definition>
 <table name="sessions">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="840" y="80"/>
+	<position x="1480" y="380"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -188,7 +199,7 @@ END;]]></definition>
 <table name="entitlement_proofs">
 	<schema name="members"/>
 	<role name="postgres"/>
-	<position x="840" y="280"/>
+	<position x="1480" y="500"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -251,6 +262,228 @@ END;
 		</idxelement>
 </index>
 
+<schema name="i8n" rect-visible="true" fill-color="#e1e1e1">
+	<role name="postgres"/>
+</schema>
+
+<table name="countries">
+	<schema name="i8n"/>
+	<role name="postgres"/>
+	<position x="360" y="140"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="code" not-null="true">
+		<type name="char" length="2"/>
+	</column>
+	<constraint name="countries_pk" type="pk-constr" table="i8n.countries">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="countries_uq_code" type="uq-constr" table="i8n.countries">
+		<columns names="code" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="languages">
+	<schema name="i8n"/>
+	<role name="postgres"/>
+	<position x="1280" y="140"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="code" not-null="true">
+		<type name="char" length="5"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="varchar" length="64"/>
+	</column>
+	<constraint name="languages_pk" type="pk-constr" table="i8n.languages">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="languages_uq_code" type="uq-constr" table="i8n.languages">
+		<columns names="code" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="country_names">
+	<schema name="i8n"/>
+	<role name="postgres"/>
+	<position x="760" y="220"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="country_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="language_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="varchar" length="64"/>
+	</column>
+	<constraint name="country_names_pk" type="pk-constr" table="i8n.country_names">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="country_names_uq_country_language" type="uq-constr" table="i8n.country_names">
+		<columns names="country_id,language_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<usertype name="enum_mollie_status" configuration="enumeration">
+	<schema name="members"/>
+	<role name="postgres"/>
+	<enumeration values="open,cancelled,expired,failed,pending,paid,paidout,refunded,charged_back"/>
+</usertype>
+
+<table name="email_verifications">
+	<schema name="members"/>
+	<role name="postgres"/>
+	<position x="1480" y="920"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="account_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="email" not-null="true">
+		<type name="varchar" length="200"/>
+	</column>
+	<column name="proof" not-null="true">
+		<type name="varchar" length="200"/>
+	</column>
+	<column name="created" not-null="true" default-value="now()">
+		<type name="date" length="0"/>
+	</column>
+	<column name="verified">
+		<type name="date" length="0"/>
+	</column>
+	<constraint name="email_verifications_pk" type="pk-constr" table="members.email_verifications">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<index name="email_verifications_idx_email_proof" table="members.email_verifications"
+	 concurrent="false" unique="true" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+		<idxelement use-sorting="false">
+			<column name="email"/>
+		</idxelement>
+		<idxelement use-sorting="true" nulls-first="false" asc-order="true">
+			<column name="proof"/>
+		</idxelement>
+</index>
+
+<table name="payments">
+	<schema name="members"/>
+	<role name="postgres"/>
+	<appended-sql><![CDATA[CREATE OR REPLACE FUNCTION total_amount(members.payments) RETURNS money AS $$
+	SELECT $1.fee_amount + $1.donation_amount + $1.purchase_amount
+$$ VOLATILE LANGUAGE SQL;]]></appended-sql>
+	<position x="1480" y="620"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="account_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="token" not-null="true">
+		<type name="varchar" length="80"/>
+	</column>
+	<column name="fee_amount" not-null="true" default-value="12.00">
+		<type name="money" length="0"/>
+	</column>
+	<column name="donation_amount" not-null="true" default-value="0.00">
+		<type name="money" length="0"/>
+	</column>
+	<column name="purchase_amount" not-null="true" default-value="0.00">
+		<type name="money" length="0"/>
+	</column>
+	<column name="purchase_options" not-null="true" default-value="'{}'">
+		<type name="varchar" length="200" dimension="1"/>
+	</column>
+	<column name="mollie_id" not-null="true">
+		<type name="varchar" length="20"/>
+	</column>
+	<column name="mollie_status" not-null="true">
+		<type name="members.enum_mollie_status" length="0"/>
+	</column>
+	<column name="mollie_created" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="mollie_paid">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="created" not-null="true" default-value="now()">
+		<type name="timestamp" length="0"/>
+	</column>
+	<constraint name="payments_pk" type="pk-constr" table="members.payments">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="payments_uq_mollie_id" type="uq-constr" table="members.payments">
+		<columns names="mollie_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="payment_check_fee_amount" type="ck-constr" table="members.payments">
+			<expression><![CDATA[fee_amount = 12.00::money]]></expression>
+	</constraint>
+	<constraint name="payments_uq_token" type="uq-constr" table="members.payments">
+		<columns names="token" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<function name="payments_fn_update_account_payment_date"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="members"/>
+	<role name="postgres"/>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="trigger" length="0"/>
+	</return-type>
+	<definition><![CDATA[BEGIN
+	IF NEW.mollie_status = 'paid'::members.enum_mollie_status AND NEW.mollie_status != OLD.mollie_status THEN
+		UPDATE members.accounts SET fee_last_payment_date = NEW.mollie_created WHERE id = NEW.account_id;
+	END IF;
+	RETURN NEW;
+END;]]></definition>
+</function>
+
+<trigger name="payments_tr_update_account_payment_date" firing-type="AFTER" per-line="true" constraint="false"
+	 ins-event="false" del-event="false" upd-event="true" trunc-event="false"
+	 table="members.payments">
+		<function signature="members.payments_fn_update_account_payment_date()"/>
+</trigger>
+
+<function name="accounts_fn_set_last_name_full"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="members"/>
+	<role name="postgres"/>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="trigger" length="0"/>
+	</return-type>
+	<definition><![CDATA[BEGIN
+	NEW.last_name_full = COALESCE(NEW.last_name_prefix, '') + NEW.last_name;
+	RETURN NEW;
+END;]]></definition>
+</function>
+
+<constraint name="accounts_fk_country" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="i8n.countries" table="members.accounts">
+	<columns names="country_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
 <constraint name="sessions_fk_account" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="CASCADE" del-action="CASCADE" ref-table="members.accounts" table="members.sessions">
 	<columns names="account_id" ref-type="src-columns"/>
@@ -259,6 +492,30 @@ END;
 
 <constraint name="entitlement_proofs_fk_account" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="members.accounts" table="members.entitlement_proofs">
+	<columns names="account_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="country_names_fk_country" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="RESTRICT" del-action="RESTRICT" ref-table="i8n.countries" table="i8n.country_names">
+	<columns names="country_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="country_names_fk_language" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="RESTRICT" del-action="RESTRICT" ref-table="i8n.languages" table="i8n.country_names">
+	<columns names="language_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="email_verifications_fk_account" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="members.accounts" table="members.email_verifications">
+	<columns names="account_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="payments_fk_account" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="members.accounts" table="members.payments">
 	<columns names="account_id" ref-type="src-columns"/>
 	<columns names="id" ref-type="dst-columns"/>
 </constraint>
@@ -272,5 +529,34 @@ END;
 	 src-table="members.entitlement_proofs"
 	 dst-table="members.accounts"
 	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_county_names_countries" type="relfk"
+	 src-table="i8n.country_names"
+	 dst-table="i8n.countries"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_county_names_languages" type="relfk"
+	 src-table="i8n.country_names"
+	 dst-table="i8n.languages"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_accounts_countries" type="relfk"
+	 src-table="members.accounts"
+	 dst-table="i8n.countries"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_payments_accounts" type="relfk"
+	 src-table="members.payments"
+	 dst-table="members.accounts"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_email_verifications_accounts" type="relfk"
+	 src-table="members.email_verifications"
+	 dst-table="members.accounts"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="0" y="0"/>
+	</label>
+</relationship>
 
 </dbmodel>

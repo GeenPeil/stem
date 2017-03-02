@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/GeenPeil/stem/rutte/common"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"github.com/pressly/chi/middleware"
@@ -17,7 +18,6 @@ func (a *API) getMemberList() http.HandlerFunc {
 	log := a.log.WithField("handler", "getMemberList")
 	log.Infoln("setup")
 
-	regexpValidatePostalcode := regexp.MustCompile(`^[0-9]{4} ?[a-zA-Z]{2}$`)
 	regexpQueryReplacer := regexp.MustCompile(`([^&|])\s+([^&|])`)
 
 	const queryStart = `
@@ -89,9 +89,9 @@ LIMIT 100
 			searchQuery = searchQuery[1:]
 		} else if _, err := strconv.ParseUint(searchQuery, 10, 64); err == nil {
 			queryStatement = stmtMemberListByID
-		} else if regexpValidateEmailAddress.MatchString(searchQuery) {
+		} else if common.RegexpValidateEmailAddress.MatchString(searchQuery) {
 			queryStatement = stmtMemberListByEmail
-		} else if regexpValidatePostalcode.MatchString(searchQuery) {
+		} else if common.RegexpValidatePostalcode.MatchString(searchQuery) {
 			if len(searchQuery) == 7 && searchQuery[4] == ' ' {
 				searchQuery = searchQuery[0:3] + searchQuery[5:6]
 			}

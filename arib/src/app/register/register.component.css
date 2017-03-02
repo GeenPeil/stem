@@ -1,0 +1,51 @@
+.container {
+	margin: 100px auto; 
+}
+.stepindicator {
+	counter-reset: step;
+}
+.stepindicator li {
+	list-style-type: none;
+	width: 33%;
+	float: left;
+	font-size: 12px;
+	position: relative;
+	text-align: center;
+	text-transform: uppercase;
+	color: #7d7d7d;
+}
+.stepindicator li:before {
+	width: 30px;
+	height: 30px;
+	content: counter(step);
+	counter-increment: step;
+	line-height: 30px;
+	border: 2px solid #7d7d7d;
+	display: block;
+	text-align: center;
+	margin: 0 auto 10px auto;
+	border-radius: 50%;
+	background-color: white;
+}
+.stepindicator li:after {
+	width: 100%;
+	height: 2px;
+	content: '';
+	position: absolute;
+	background-color: #7d7d7d;
+	top: 15px;
+	left: -50%;
+	z-index: -1;
+}
+.stepindicator li:first-child:after {
+	content: none;
+}
+.stepindicator li.active {
+	color: green;
+}
+.stepindicator li.active:before {
+	border-color: #55b776;
+}
+.stepindicator li.active + li:after {
+	background-color: #55b776;
+}

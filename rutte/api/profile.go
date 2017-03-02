@@ -14,6 +14,7 @@ func (a *API) getProfileOverview() http.HandlerFunc {
 
 	stmtGetItem, err := a.db.Preparex(`
 		SELECT
+			accounts.id,
 			accounts.nickname,
 			accounts.email
 		FROM members.accounts
@@ -23,12 +24,9 @@ func (a *API) getProfileOverview() http.HandlerFunc {
 	}
 
 	type OutProfile struct {
+		ID       uint64 `json:"id"`
 		Nickname string `json:"nickname"`
 		Email    string `json:"email"`
-	}
-
-	type Out struct {
-		Profile OutProfile `json:"profile"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -43,10 +41,8 @@ func (a *API) getProfileOverview() http.HandlerFunc {
 		}
 
 		// read profile from db
-		var out = Out{
-			Profile: OutProfile{},
-		}
-		err = stmtGetItem.QueryRowx(accountID).StructScan(&out.Profile)
+		var out = OutProfile{}
+		err = stmtGetItem.QueryRowx(accountID).StructScan(&out)
 		if err != nil {
 			log.WithError(err).Error("error scanning row into struct")
 			http.Error(w, "server error", http.StatusInternalServerError)
